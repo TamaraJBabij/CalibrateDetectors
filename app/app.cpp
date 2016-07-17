@@ -34,6 +34,7 @@
 #include <TAxis.h>
 #include "HistUVWPositions.h"
 
+
 using namespace std;
 
 //this will eventually take data from the DAQ software Dan Murtagh wrote
@@ -47,7 +48,7 @@ int main(int argc, char* argv[]) {
 	//Initial function to set up the debug environment
 	int setUpDebugEnvironment();
 	//initialises root app
-	TApplication* rootapp = new TApplication("example", &argc, argv);
+	TApplication* rootapp = new TApplication("C:/Users/TamaraB/Documents/GitHub/CalibrateDetectors", &argc, argv);
 
 	/*
 	This program can be run for lower intensity beams, however maxes out memory above 60 trees
@@ -80,9 +81,27 @@ int main(int argc, char* argv[]) {
 		exit(1);
 	}
 
+	//Declare trees to write to
+	
+	TTree NegDetPositions("Position Info for Detectors", "Tree that stores position info such that calibration can be done without reloading");
+	bool ULayer = false;
+	bool VLayer = false;
+	bool WLayer = false;
+	Double_t u1Time, u2Time, v1Time, v2Time, w1Time, w2Time;
+	Int_t GroupNumber = 1;
+	NegDetPositions.Branch("GroupNumber", &GroupNumber);
+	//treePositions.Branch("Detector", &Detector);
+	NegDetPositions.Branch("ULayer", &ULayer);
+	NegDetPositions.Branch("u1Time", &u1Time);
+	NegDetPositions.Branch("u2Time", &u2Time);
+	NegDetPositions.Branch("VLayer", &VLayer);
+	NegDetPositions.Branch("v1Time", &v1Time);
+	NegDetPositions.Branch("v2Time", &v2Time);
+	NegDetPositions.Branch("WLayer", &WLayer);
+	NegDetPositions.Branch("w1Time", &w1Time);
+	NegDetPositions.Branch("w2Time", &w2Time);
 
 	//scans folder and loads all tree ( .root) files into the dataset
-
 	string fileLocation;
 	cout << "what is the directory? remember to add a backslash at the end" << endl;
 	cin >> fileLocation;
@@ -491,8 +510,69 @@ int main(int argc, char* argv[]) {
 				/**
 				* Convert time to position info
 				*First off need to get U,V,W from u1 u2, v1 v2, w1 w2
-				*
 				*/
+
+				/*
+				*WRITE POSITIONS TO TREE
+				*ELIMINATE PROCESSING TIME DURING CALIBRATION
+				*/
+				if (userDet == posDet) {
+
+				}
+				else if (userDet == negDet) {
+					//Store fit parameters into a tree for later accessing
+					// setting up tree
+					//Ideally want to store tree with filename
+					
+					
+
+
+					for (Group* g : *reconData) {
+						for (Event* e : g->events) {
+							if (e->mcp->detector == neg) {
+								if (e->uPairs.size() == 1) {
+									ULayer = true;
+									u1Time = e->uPairs.front().line1;
+									u2Time = e->uPairs.front().line2;
+								}
+								else {
+									ULayer = false;
+									u1Time = 0;
+									u2Time = 0;
+								}
+								if (e->vPairs.size() == 1) {
+									VLayer = true;
+									v1Time = e->vPairs.front().line1;
+									v2Time = e->vPairs.front().line2;
+								}
+								else {
+									VLayer = false;
+									v1Time = 0;
+									v2Time = 0;
+								}
+								if (e->wPairs.size() == 1) {
+									WLayer = true;
+									w1Time = e->wPairs.front().line1;
+									w2Time = e->wPairs.front().line2;
+								}
+								else {
+									WLayer = false;
+									w1Time = 0;
+									w2Time = 0;
+								}
+								NegDetPositions.Fill();
+							}
+						}
+					}
+					GroupNumber++;
+				}
+				else if (userDet == bothDet) {
+
+				}
+				
+				
+
+
 
 				convertLayerPosition(reconData, Pitches, userDet, &UVWPositions);
 
@@ -566,6 +646,8 @@ int main(int argc, char* argv[]) {
 				delete data;
 			}
 		}
+		TFile rawPositionFile("RawPositionInfoTree.root", "recreate");
+		NegDetPositions.Write();
 	}
 	else {
 		cout << "Directory does not exist, exiting" << endl;
@@ -576,16 +658,16 @@ int main(int argc, char* argv[]) {
 		//bin 0 to 200
 
 		//double scaleUV = 1.0 / UVWMasklayers.UVPosMasklayer->GetMaximum();
-		double scaleUV = 1.0 / UVWMasklayers.UVPosMasklayer->Integral(0,200);
-		UVWMasklayers.UVPosMasklayer->Scale(scaleUV);
+		//double scaleUV = 1.0 / UVWMasklayers.UVPosMasklayer->Integral(0,200);
+		//UVWMasklayers.UVPosMasklayer->Scale(scaleUV);
 		//double scaleUW = 1.0 / UVWMasklayers.UWPosMasklayer->GetMaximum();
-		double scaleUW = 1.0 / UVWMasklayers.UWPosMasklayer->Integral(0,200);
-		UVWMasklayers.UWPosMasklayer->Scale(scaleUW);
+		//double scaleUW = 1.0 / UVWMasklayers.UWPosMasklayer->Integral(0,200);
+		//UVWMasklayers.UWPosMasklayer->Scale(scaleUW);
 		//double scaleVW = 1.0 / UVWMasklayers.VWPosMasklayer->GetMaximum();
-		double scaleVW = 1.0 / UVWMasklayers.VWPosMasklayer->Integral(0,200);
-		UVWMasklayers.VWPosMasklayer->Scale(scaleVW);
-		UVWPosMaskLayersCanvas.Modified();
-		UVWPosMaskLayersCanvas.Update();
+		//double scaleVW = 1.0 / UVWMasklayers.VWPosMasklayer->Integral(0,200);
+		//UVWMasklayers.VWPosMasklayer->Scale(scaleVW);
+		//UVWPosMaskLayersCanvas.Modified();
+		//UVWPosMaskLayersCanvas.Update();
 
 	/*Fitting Guassians to interesting areas on the 1d Hist (detector slice)
 	Dealing with canvas 7
