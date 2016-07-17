@@ -45,3 +45,11 @@ $RECYCLE.BIN/
 Network Trash Folder
 Temporary Items
 .apdisk
+app/DataSetTree.root
+*.log
+*.tlog
+*.obj
+*.root
+*.exe
+testlesstrees/Meta142919.txt
+test/Raw142919.txt
