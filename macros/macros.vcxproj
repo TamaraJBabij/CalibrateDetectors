@@ -138,6 +138,7 @@
     <ClCompile Include="plotTimeSpectraDS.cpp" />
     <ClCompile Include="plotTimeSpectraEvents.cpp" />
     <ClCompile Include="plotTimeSums.cpp" />
+    <ClCompile Include="positionsTreeToDataSet.cpp" />
     <ClCompile Include="ReadWriteTree.cpp" />
     <ClCompile Include="scanFiles.cpp" />
     <ClCompile Include="selectPosIonElec.cpp" />

@@ -25,6 +25,7 @@ void histogramXYPositions(DataSet *reconData, HistogramXY XYpositions) {
 		if (g->negative.x ) {
 			if (g->negative.y) {
 				XYpositions.electronDET->Fill(g->negative.x, g->negative.y);
+				cout << "hist fill" << endl;
 			}
 		}
 		//XYpositions.positronDET->Fill(g->positive.x, g->positive.y);

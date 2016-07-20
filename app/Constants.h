@@ -33,6 +33,11 @@ enum ParticleID
 	unidentified
 };
 
+enum CalibrateLoadType {
+	PositionTreeWrite,
+	PositionTreeRead
+};
+
 struct Constants {
 	static const vector<Layer> layers;
 	static const vector<Charge> charges;

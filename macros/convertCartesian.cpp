@@ -6,8 +6,9 @@
 #include "PitchData.h"
 #include "math.h"
 #include "Constants.h"
+#include "HistogramXY.h"
 
-void convertCartesianPosition(DataSet* reconData, imagingDetectors userDet) {
+void convertCartesianPosition(DataSet* reconData, imagingDetectors userDet, HistogramXY XYpositions) {
 	//cout << "convertCartesianPosition" << endl;
 	if (userDet == bothDet) {
 		for (Group* g : *reconData) {
@@ -30,6 +31,7 @@ void convertCartesianPosition(DataSet* reconData, imagingDetectors userDet) {
 						p.y += p.y_uv;
 						count++;
 						p.xy_uv = true;
+						//cout << "UV: " << p.y_uv << endl;
 					}
 					else if (e->uPairs.size() == 1 && e->wPairs.size() == 1) {
 						p.x_uw = e->U;
@@ -38,6 +40,7 @@ void convertCartesianPosition(DataSet* reconData, imagingDetectors userDet) {
 						p.y += p.y_uw;
 						count++;
 						p.xy_uw = true;
+						//cout << "UW: " << p.y_uw << endl;
 					}
 					else if (e->vPairs.size() == 1 && e->wPairs.size() == 1) {
 						p.x_vw = e->V + e->W;
@@ -175,6 +178,7 @@ void convertCartesianPosition(DataSet* reconData, imagingDetectors userDet) {
 						p.y += p.y_uv;
 						count++;
 						p.xy_uv = true;
+						//cout << "UV: " << p.y_uv << endl;
 					}
 					if (e->uPairs.size() == 1 && e->wPairs.size() == 1) {
 						p.x_uw = e->U;
@@ -183,6 +187,7 @@ void convertCartesianPosition(DataSet* reconData, imagingDetectors userDet) {
 						p.y += p.y_uw;
 						count++;
 						p.xy_uw = true;
+						//cout << "UW: " << p.y_uw << endl;
 					}
 					if (e->vPairs.size() == 1 && e->wPairs.size() == 1) {
 						p.x_vw = e->V - e->W;
@@ -197,6 +202,7 @@ void convertCartesianPosition(DataSet* reconData, imagingDetectors userDet) {
 					//cout << "x " << p.x << endl;
 					//cout << "y " << p.y << endl;
 					g->negative = p;
+					XYpositions.electronDET->Fill(g->negative.x, g->negative.y);
 				}
 			}
 		}

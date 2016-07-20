@@ -81,25 +81,19 @@ int main(int argc, char* argv[]) {
 		exit(1);
 	}
 
-	//Declare trees to write to
-	
-	TTree NegDetPositions("Position Info for Detectors", "Tree that stores position info such that calibration can be done without reloading");
-	bool ULayer = false;
-	bool VLayer = false;
-	bool WLayer = false;
-	Double_t u1Time, u2Time, v1Time, v2Time, w1Time, w2Time;
-	Int_t GroupNumber = 1;
-	NegDetPositions.Branch("GroupNumber", &GroupNumber);
-	//treePositions.Branch("Detector", &Detector);
-	NegDetPositions.Branch("ULayer", &ULayer);
-	NegDetPositions.Branch("u1Time", &u1Time);
-	NegDetPositions.Branch("u2Time", &u2Time);
-	NegDetPositions.Branch("VLayer", &VLayer);
-	NegDetPositions.Branch("v1Time", &v1Time);
-	NegDetPositions.Branch("v2Time", &v2Time);
-	NegDetPositions.Branch("WLayer", &WLayer);
-	NegDetPositions.Branch("w1Time", &w1Time);
-	NegDetPositions.Branch("w2Time", &w2Time);
+	//	Load from the DAQ tree files, then load from from raw positions tree
+	string loadtype;
+	cout << "Would you like to run program to read in DAQ files (type: read), or to load a raw positions tree (type: load)" << endl;
+	cin >> loadtype;
+	CalibrateLoadType sessionOption;
+	if (loadtype.compare("read") == 0) {
+		sessionOption = PositionTreeWrite;
+	}
+	else if (loadtype.compare("load") == 0) {
+		sessionOption = PositionTreeRead;
+	}
+
+
 
 	//scans folder and loads all tree ( .root) files into the dataset
 	string fileLocation;
@@ -118,7 +112,8 @@ int main(int argc, char* argv[]) {
 	double_t canvasWidth = 800;
 	double_t h = 800;
 	PitchPropSet Pitches;
-
+	//calculate pitch propogation
+	Pitches = calculatePitchProp();
 	TCanvas timesumsCanvas("Time sums canvas", "Time Sums");
 
 	//Needs to be implemented for pos det
@@ -273,418 +268,478 @@ int main(int argc, char* argv[]) {
 	// scans through all files in the folder
 	//  parses in all .root files (trees) created by DAQ software
 	vector<char*> files;
-	if (dir != NULL) {
-		while (pdir = readdir(dir)) {
-			char* fileName = pdir->d_name;
-			if (strlen(fileName) > 5 && !strcmp(fileName + strlen(fileName) - 5, ".root")) {
+	if (sessionOption == PositionTreeWrite){
 
-				DataSet* data = new DataSet();
-				//using string Folder Name acquire intiial tree
-				//Initial tree is given by ReMinumber with no underscore number
-				//cout << fileName << endl;
-				char str[256];
-				strcpy(str, fileLocation.c_str());
-				strcat(str, fileName);
-				//cout << str << endl;
-				cout << filenumber << endl;
-				filenumber++;
+		//Declare trees to write to
+		TTree NegDetPositions("Position Info for Detectors", "Tree that stores position info such that calibration can be done without reloading");
+		bool ULayer = false;
+		bool VLayer = false;
+		bool WLayer = false;
+		Double_t u1Time, u2Time, v1Time, v2Time, w1Time, w2Time;
+		Int_t GroupNumber = 1;
 
-				TFile* rawFile = TFile::Open(str);
-				TTree* rawTree = (TTree*)rawFile->Get("T");
-				loadFromTreeDataSet(rawTree, data);
-				rawFile->Close();
-				//Associate hits into events, where event is a single particle/ion hit on the detector. Events are sorted by group
-				constructEvents(data);
+		NegDetPositions.Branch("GroupNumber", &GroupNumber);
+		//treePositions.Branch("Detector", &Detector);
+		NegDetPositions.Branch("ULayer", &ULayer);
+		NegDetPositions.Branch("u1Time", &u1Time);
+		NegDetPositions.Branch("u2Time", &u2Time);
+		NegDetPositions.Branch("VLayer", &VLayer);
+		NegDetPositions.Branch("v1Time", &v1Time);
+		NegDetPositions.Branch("v2Time", &v2Time);
+		NegDetPositions.Branch("WLayer", &WLayer);
+		NegDetPositions.Branch("w1Time", &w1Time);
+		NegDetPositions.Branch("w2Time", &w2Time);
 
-				// construct timesum histograms on first file
-				if (firstFile) {
-					timesums = calculateTimeSums(data, userDet);
-					firstFile = false;
-					//Store fit parameters into a tree for later accessing
-					// setting up tree
-					TFile file("TimeSumTree.root", "recreate");
-					TTree treeTS("TimeSumPeaks", "simple tree that stores timesum peaks and sigma");
+		
+		TTree PosDetPositions("Position Info for Detectors", "Tree that stores position info such that calibration can be done without reloading");
+		PosDetPositions.Branch("GroupNumber", &GroupNumber);
+		//treePositions.Branch("Detector", &Detector);
+		PosDetPositions.Branch("ULayer", &ULayer);
+		PosDetPositions.Branch("u1Time", &u1Time);
+		PosDetPositions.Branch("u2Time", &u2Time);
+		PosDetPositions.Branch("VLayer", &VLayer);
+		PosDetPositions.Branch("v1Time", &v1Time);
+		PosDetPositions.Branch("v2Time", &v2Time);
+		PosDetPositions.Branch("WLayer", &WLayer);
+		PosDetPositions.Branch("w1Time", &w1Time);
+		PosDetPositions.Branch("w2Time", &w2Time);
+			
+			
+		if (dir != NULL) {
+			while (pdir = readdir(dir)) {
+				char* fileName = pdir->d_name;
+				if (strlen(fileName) > 5 && !strcmp(fileName + strlen(fileName) - 5, ".root")) {
 
-					Double_t peak, sigma, error;
-					//Will define layer numbers in configuration.h file
-					//not sure if text/string can be stored in trees
-					Double_t layer;
-					treeTS.Branch("Layer", &layer);
-					treeTS.Branch("Peak", &peak);
-					treeTS.Branch("Sigma", &sigma);
-					treeTS.Branch("Error", &error);
+					DataSet* data = new DataSet();
+					//using string Folder Name acquire intiial tree
+					//Initial tree is given by ReMinumber with no underscore number
+					//cout << fileName << endl;
+					char str[256];
+					strcpy(str, fileLocation.c_str());
+					strcat(str, fileName);
+					//cout << str << endl;
+					cout << filenumber << endl;
+					filenumber++;
 
-					/* CALCULATES AND FITS TIMESUMS BASED ON DETECTORS */
-					if (userDet == bothDet) {
+					TFile* rawFile = TFile::Open(str);
+					TTree* rawTree = (TTree*)rawFile->Get("T");
+					loadFromTreeDataSet(rawTree, data);
+					rawFile->Close();
+					//Associate hits into events, where event is a single particle/ion hit on the detector. Events are sorted by group
+					constructEvents(data);
 
-						//set up canvas for time sums - 3 for each detector - 6 in total
-						//TPad::Divide() specifies number of vertical and horizontal slices of canvas
-						timesumsCanvas.Divide(2, 3);
+					// construct timesum histograms on first file
+					if (firstFile) {
+						timesums = calculateTimeSums(data, userDet);
+						firstFile = false;
+						//Store fit parameters into a tree for later accessing
+						// setting up tree
+						TFile file("TimeSumTree.root", "recreate");
+						TTree treeTS("TimeSumPeaks", "simple tree that stores timesum peaks and sigma");
 
-						timesumsCanvas.cd(1);
-						timesums.layer_upos->Draw();
-						timesums.layer_upos->Fit("gaus");
-						gStyle->SetOptFit(0011);
-						TF1 *fitu = timesums.layer_upos->GetFunction("gaus");
-						layer = CFG_LAYER_UPOS;
-						peak = fitu->GetParameter(1);
-						sigma = fitu->GetParameter(2);
-						error = fitu->GetParError(1);
-						treeTS.Fill();
-						fits.setFit(u, positive, peak, error, sigma);
-						//Want to display fit parameters on timesums plots
-						//timesums.layer_upos->SetOptFit();
+						Double_t peak, sigma, error;
+						//Will define layer numbers in configuration.h file
+						//not sure if text/string can be stored in trees
+						Double_t layer;
+						treeTS.Branch("Layer", &layer);
+						treeTS.Branch("Peak", &peak);
+						treeTS.Branch("Sigma", &sigma);
+						treeTS.Branch("Error", &error);
 
-						timesumsCanvas.cd(2);
-						timesums.layer_vpos->Draw();
-						timesums.layer_vpos->Fit("gaus");
-						TF1 *fitv = timesums.layer_vpos->GetFunction("gaus");
-						layer = CFG_LAYER_VPOS;
-						peak = fitv->GetParameter(1);
-						sigma = fitv->GetParameter(2);
-						error = fitv->GetParError(1);
-						treeTS.Fill();
-						fits.setFit(v, positive, peak, error, sigma);
+						/* CALCULATES AND FITS TIMESUMS BASED ON DETECTORS */
+						if (userDet == bothDet) {
 
-						timesumsCanvas.cd(3);
-						timesums.layer_wpos->Draw();
-						timesums.layer_wpos->Fit("gaus");
-						TF1 *fitw = timesums.layer_wpos->GetFunction("gaus");
-						layer = CFG_LAYER_WPOS;
-						peak = fitw->GetParameter(1);
-						sigma = fitw->GetParameter(2);
-						error = fitw->GetParError(1);
-						treeTS.Fill();
-						fits.setFit(w, positive, peak, error, sigma);
+							//set up canvas for time sums - 3 for each detector - 6 in total
+							//TPad::Divide() specifies number of vertical and horizontal slices of canvas
+							timesumsCanvas.Divide(2, 3);
 
-						timesumsCanvas.cd(4);
-						timesums.layer_uneg->Draw();
-						timesums.layer_uneg->Fit("gaus");
-						TF1 *fitun = timesums.layer_uneg->GetFunction("gaus");
-						layer = CFG_LAYER_UNEG;
-						peak = fitun->GetParameter(1);
-						sigma = fitun->GetParameter(2);
-						error = fitun->GetParError(1);
-						treeTS.Fill();
-						fits.setFit(u, negative, peak, error, sigma);
+							timesumsCanvas.cd(1);
+							timesums.layer_upos->Draw();
+							timesums.layer_upos->Fit("gaus");
+							gStyle->SetOptFit(0011);
+							TF1 *fitu = timesums.layer_upos->GetFunction("gaus");
+							layer = CFG_LAYER_UPOS;
+							peak = fitu->GetParameter(1);
+							sigma = fitu->GetParameter(2);
+							error = fitu->GetParError(1);
+							treeTS.Fill();
+							fits.setFit(u, positive, peak, error, sigma);
+							//Want to display fit parameters on timesums plots
+							//timesums.layer_upos->SetOptFit();
 
-						timesumsCanvas.cd(5);
-						timesums.layer_vneg->Draw();
-						timesums.layer_vneg->Fit("gaus");
-						TF1 *fitvn = timesums.layer_vneg->GetFunction("gaus");
-						layer = CFG_LAYER_VNEG;
-						peak = fitvn->GetParameter(1);
-						sigma = fitvn->GetParameter(2);
-						error = fitvn->GetParError(1);
-						treeTS.Fill();
-						fits.setFit(v, negative, peak, error, sigma);
+							timesumsCanvas.cd(2);
+							timesums.layer_vpos->Draw();
+							timesums.layer_vpos->Fit("gaus");
+							TF1 *fitv = timesums.layer_vpos->GetFunction("gaus");
+							layer = CFG_LAYER_VPOS;
+							peak = fitv->GetParameter(1);
+							sigma = fitv->GetParameter(2);
+							error = fitv->GetParError(1);
+							treeTS.Fill();
+							fits.setFit(v, positive, peak, error, sigma);
 
-						timesumsCanvas.cd(6);
-						timesums.layer_wneg->Draw();
-						timesums.layer_wneg->Fit("gaus");
-						TF1 *fitwn = timesums.layer_wneg->GetFunction("gaus");
-						layer = CFG_LAYER_WNEG;
-						peak = fitwn->GetParameter(1);
-						sigma = fitwn->GetParameter(2);
-						error = fitwn->GetParError(1);
-						treeTS.Fill();
-						fits.setFit(w, negative, peak, error, sigma);
-						timesumsCanvas.Modified();
-						timesumsCanvas.Update();
+							timesumsCanvas.cd(3);
+							timesums.layer_wpos->Draw();
+							timesums.layer_wpos->Fit("gaus");
+							TF1 *fitw = timesums.layer_wpos->GetFunction("gaus");
+							layer = CFG_LAYER_WPOS;
+							peak = fitw->GetParameter(1);
+							sigma = fitw->GetParameter(2);
+							error = fitw->GetParError(1);
+							treeTS.Fill();
+							fits.setFit(w, positive, peak, error, sigma);
+
+							timesumsCanvas.cd(4);
+							timesums.layer_uneg->Draw();
+							timesums.layer_uneg->Fit("gaus");
+							TF1 *fitun = timesums.layer_uneg->GetFunction("gaus");
+							layer = CFG_LAYER_UNEG;
+							peak = fitun->GetParameter(1);
+							sigma = fitun->GetParameter(2);
+							error = fitun->GetParError(1);
+							treeTS.Fill();
+							fits.setFit(u, negative, peak, error, sigma);
+
+							timesumsCanvas.cd(5);
+							timesums.layer_vneg->Draw();
+							timesums.layer_vneg->Fit("gaus");
+							TF1 *fitvn = timesums.layer_vneg->GetFunction("gaus");
+							layer = CFG_LAYER_VNEG;
+							peak = fitvn->GetParameter(1);
+							sigma = fitvn->GetParameter(2);
+							error = fitvn->GetParError(1);
+							treeTS.Fill();
+							fits.setFit(v, negative, peak, error, sigma);
+
+							timesumsCanvas.cd(6);
+							timesums.layer_wneg->Draw();
+							timesums.layer_wneg->Fit("gaus");
+							TF1 *fitwn = timesums.layer_wneg->GetFunction("gaus");
+							layer = CFG_LAYER_WNEG;
+							peak = fitwn->GetParameter(1);
+							sigma = fitwn->GetParameter(2);
+							error = fitwn->GetParError(1);
+							treeTS.Fill();
+							fits.setFit(w, negative, peak, error, sigma);
+							timesumsCanvas.Modified();
+							timesumsCanvas.Update();
+						}
+
+						else if (userDet == posDet) {
+							//set up canvas for time sums - 3 for each detector - therefore only 3 in one det in use
+							//TPad::Divide() specifies number of vertical and horizontal slices of canvas
+							timesumsCanvas.Divide(1, 3);
+
+							timesumsCanvas.cd(1);
+							timesums.layer_upos->Draw();
+							timesums.layer_upos->Fit("gaus");
+							gStyle->SetOptFit(0011);
+							TF1 *fitu = timesums.layer_upos->GetFunction("gaus");
+							layer = CFG_LAYER_UPOS;
+							peak = fitu->GetParameter(1);
+							sigma = fitu->GetParameter(2);
+							error = fitu->GetParError(1);
+							treeTS.Fill();
+							fits.setFit(u, positive, peak, error, sigma);
+							//Want to display fit parameters on timesums plots
+							//timesums.layer_upos->SetOptFit();
+
+							timesumsCanvas.cd(2);
+							timesums.layer_vpos->Draw();
+							timesums.layer_vpos->Fit("gaus");
+							TF1 *fitv = timesums.layer_vpos->GetFunction("gaus");
+							layer = CFG_LAYER_VPOS;
+							peak = fitv->GetParameter(1);
+							sigma = fitv->GetParameter(2);
+							error = fitv->GetParError(1);
+							treeTS.Fill();
+							fits.setFit(v, positive, peak, error, sigma);
+
+							timesumsCanvas.cd(3);
+							timesums.layer_wpos->Draw();
+							timesums.layer_wpos->Fit("gaus");
+							TF1 *fitw = timesums.layer_wpos->GetFunction("gaus");
+							layer = CFG_LAYER_WPOS;
+							peak = fitw->GetParameter(1);
+							sigma = fitw->GetParameter(2);
+							error = fitw->GetParError(1);
+							treeTS.Fill();
+							fits.setFit(w, positive, peak, error, sigma);
+							timesumsCanvas.Modified();
+							timesumsCanvas.Update();
+						}
+
+						else if (userDet == negDet) {
+							//detmust be negative
+							//set up canvas for time sums - 3 for each detector - therefore only 3 in one det in use
+							//TPad::Divide() specifies number of vertical and horizontal slices of canvas
+							timesumsCanvas.Divide(1, 3);
+							timesumsCanvas.cd(1);
+							timesums.layer_uneg->Draw();
+							timesums.layer_uneg->Fit("gaus");
+							TF1 *fitun = timesums.layer_uneg->GetFunction("gaus");
+							layer = CFG_LAYER_UNEG;
+							peak = fitun->GetParameter(1);
+							sigma = fitun->GetParameter(2);
+							error = fitun->GetParError(1);
+							treeTS.Fill();
+							fits.setFit(u, negative, peak, error, sigma);
+
+							timesumsCanvas.cd(2);
+							timesums.layer_vneg->Draw();
+							timesums.layer_vneg->Fit("gaus");
+							TF1 *fitvn = timesums.layer_vneg->GetFunction("gaus");
+							layer = CFG_LAYER_VNEG;
+							peak = fitvn->GetParameter(1);
+							sigma = fitvn->GetParameter(2);
+							error = fitvn->GetParError(1);
+							treeTS.Fill();
+							fits.setFit(v, negative, peak, error, sigma);
+
+							timesumsCanvas.cd(3);
+							timesums.layer_wneg->Draw();
+							timesums.layer_wneg->Fit("gaus");
+							TF1 *fitwn = timesums.layer_wneg->GetFunction("gaus");
+							layer = CFG_LAYER_WNEG;
+							peak = fitwn->GetParameter(1);
+							sigma = fitwn->GetParameter(2);
+							error = fitwn->GetParError(1);
+							treeTS.Fill();
+							fits.setFit(w, negative, peak, error, sigma);
+							timesumsCanvas.Modified();
+							timesumsCanvas.Update();
+						}
+
+						//Want to write timesum information to tree for accessing later in program, also to save to csv such that
+						//ts info for all runs can be accessed at later dates without rerunning code
+						treeTS.Write();
+						
 					}
 
-					else if (userDet == posDet) {
-						//set up canvas for time sums - 3 for each detector - therefore only 3 in one det in use
-						//TPad::Divide() specifies number of vertical and horizontal slices of canvas
-						timesumsCanvas.Divide(1, 3);
+					//Checks timesums are within 2sigma of fitted peak
+					checkTimeSums(data, fits, userDet);
 
-						timesumsCanvas.cd(1);
-						timesums.layer_upos->Draw();
-						timesums.layer_upos->Fit("gaus");
-						gStyle->SetOptFit(0011);
-						TF1 *fitu = timesums.layer_upos->GetFunction("gaus");
-						layer = CFG_LAYER_UPOS;
-						peak = fitu->GetParameter(1);
-						sigma = fitu->GetParameter(2);
-						error = fitu->GetParError(1);
-						treeTS.Fill();
-						fits.setFit(u, positive, peak, error, sigma);
-						//Want to display fit parameters on timesums plots
-						//timesums.layer_upos->SetOptFit();
+					//takes timedifferences of MCP hits for each event within a group
+					//identifies particle and stores in MCPTDiff double
+					//stored is the particleID and timedifference relative to positron
+					//identifyAndTime(data);
 
-						timesumsCanvas.cd(2);
-						timesums.layer_vpos->Draw();
-						timesums.layer_vpos->Fit("gaus");
-						TF1 *fitv = timesums.layer_vpos->GetFunction("gaus");
-						layer = CFG_LAYER_VPOS;
-						peak = fitv->GetParameter(1);
-						sigma = fitv->GetParameter(2);
-						error = fitv->GetParError(1);
-						treeTS.Fill();
-						fits.setFit(v, positive, peak, error, sigma);
+					// want to index number of particles and bool triple for each each group
+					//selectPosIonElec(data);
 
-						timesumsCanvas.cd(3);
-						timesums.layer_wpos->Draw();
-						timesums.layer_wpos->Fit("gaus");
-						TF1 *fitw = timesums.layer_wpos->GetFunction("gaus");
-						layer = CFG_LAYER_WPOS;
-						peak = fitw->GetParameter(1);
-						sigma = fitw->GetParameter(2);
-						error = fitw->GetParError(1);
-						treeTS.Fill();
-						fits.setFit(w, positive, peak, error, sigma);
-						timesumsCanvas.Modified();
-						timesumsCanvas.Update();
+					//check each particle hit has enough information to reconstruct X Y position
+					//not needed for ion
+					//does not need userDet check
+					checkReconstructable(data);
+
+					//now need to check for all three particles (ion, pos, elec) and that the pos and elec have a reconBool
+
+					//Copy over triple coincidences with reconstrutable particle hits to new dataset
+
+					//does not need userDet
+					DataSet *reconData = sortReconData(data);
+					/**
+					* Convert time to position info
+					*First off need to get U,V,W from u1 u2, v1 v2, w1 w2
+					*/
+
+					/*
+					*WRITE POSITIONS TO TREE
+					*ELIMINATE PROCESSING TIME DURING CALIBRATION
+					*/
+					if (userDet == posDet) {
+
 					}
-
 					else if (userDet == negDet) {
-						//detmust be negative
-						//set up canvas for time sums - 3 for each detector - therefore only 3 in one det in use
-						//TPad::Divide() specifies number of vertical and horizontal slices of canvas
-						timesumsCanvas.Divide(1, 3);
-						timesumsCanvas.cd(1);
-						timesums.layer_uneg->Draw();
-						timesums.layer_uneg->Fit("gaus");
-						TF1 *fitun = timesums.layer_uneg->GetFunction("gaus");
-						layer = CFG_LAYER_UNEG;
-						peak = fitun->GetParameter(1);
-						sigma = fitun->GetParameter(2);
-						error = fitun->GetParError(1);
-						treeTS.Fill();
-						fits.setFit(u, negative, peak, error, sigma);
-
-						timesumsCanvas.cd(2);
-						timesums.layer_vneg->Draw();
-						timesums.layer_vneg->Fit("gaus");
-						TF1 *fitvn = timesums.layer_vneg->GetFunction("gaus");
-						layer = CFG_LAYER_VNEG;
-						peak = fitvn->GetParameter(1);
-						sigma = fitvn->GetParameter(2);
-						error = fitvn->GetParError(1);
-						treeTS.Fill();
-						fits.setFit(v, negative, peak, error, sigma);
-
-						timesumsCanvas.cd(3);
-						timesums.layer_wneg->Draw();
-						timesums.layer_wneg->Fit("gaus");
-						TF1 *fitwn = timesums.layer_wneg->GetFunction("gaus");
-						layer = CFG_LAYER_WNEG;
-						peak = fitwn->GetParameter(1);
-						sigma = fitwn->GetParameter(2);
-						error = fitwn->GetParError(1);
-						treeTS.Fill();
-						fits.setFit(w, negative, peak, error, sigma);
-						timesumsCanvas.Modified();
-						timesumsCanvas.Update();
-					}
-
-					//Want to write timesum information to tree for accessing later in program, also to save to csv such that
-					//ts info for all runs can be accessed at later dates without rerunning code
-					treeTS.Write();
-					//calculate pitch propogation
-					Pitches = calculatePitchProp(fits);
-				}
-
-				//Checks timesums are within 2sigma of fitted peak
-				checkTimeSums(data, fits, userDet);
-
-				//takes timedifferences of MCP hits for each event within a group
-				//identifies particle and stores in MCPTDiff double
-				//stored is the particleID and timedifference relative to positron
-				//identifyAndTime(data);
-
-				// want to index number of particles and bool triple for each each group
-				//selectPosIonElec(data);
-
-				//check each particle hit has enough information to reconstruct X Y position
-				//not needed for ion
-				//does not need userDet check
-				checkReconstructable(data);
-
-				//now need to check for all three particles (ion, pos, elec) and that the pos and elec have a reconBool
-
-				//Copy over triple coincidences with reconstrutable particle hits to new dataset
-
-				//does not need userDet
-				DataSet *reconData = sortReconData(data);
-				/**
-				* Convert time to position info
-				*First off need to get U,V,W from u1 u2, v1 v2, w1 w2
-				*/
-
-				/*
-				*WRITE POSITIONS TO TREE
-				*ELIMINATE PROCESSING TIME DURING CALIBRATION
-				*/
-				if (userDet == posDet) {
-
-				}
-				else if (userDet == negDet) {
-					//Store fit parameters into a tree for later accessing
-					// setting up tree
-					//Ideally want to store tree with filename
-					
-					
+						//Store fit parameters into a tree for later accessing
+						// setting up tree
+						//Ideally want to store tree with filename
 
 
-					for (Group* g : *reconData) {
-						for (Event* e : g->events) {
-							if (e->mcp->detector == neg) {
-								if (e->uPairs.size() == 1) {
-									ULayer = true;
-									u1Time = e->uPairs.front().line1;
-									u2Time = e->uPairs.front().line2;
+
+
+						for (Group* g : *reconData) {
+							for (Event* e : g->events) {
+								if (e->mcp->detector == neg) {
+									if (e->uPairs.size() == 1) {
+										ULayer = true;
+										u1Time = e->uPairs.front().line1;
+										u2Time = e->uPairs.front().line2;
+									}
+									else {
+										ULayer = false;
+										u1Time = 0;
+										u2Time = 0;
+									}
+									if (e->vPairs.size() == 1) {
+										VLayer = true;
+										v1Time = e->vPairs.front().line1;
+										v2Time = e->vPairs.front().line2;
+									}
+									else {
+										VLayer = false;
+										v1Time = 0;
+										v2Time = 0;
+									}
+									if (e->wPairs.size() == 1) {
+										WLayer = true;
+										w1Time = e->wPairs.front().line1;
+										w2Time = e->wPairs.front().line2;
+									}
+									else {
+										WLayer = false;
+										w1Time = 0;
+										w2Time = 0;
+									}
+									NegDetPositions.Fill();
 								}
-								else {
-									ULayer = false;
-									u1Time = 0;
-									u2Time = 0;
-								}
-								if (e->vPairs.size() == 1) {
-									VLayer = true;
-									v1Time = e->vPairs.front().line1;
-									v2Time = e->vPairs.front().line2;
-								}
-								else {
-									VLayer = false;
-									v1Time = 0;
-									v2Time = 0;
-								}
-								if (e->wPairs.size() == 1) {
-									WLayer = true;
-									w1Time = e->wPairs.front().line1;
-									w2Time = e->wPairs.front().line2;
-								}
-								else {
-									WLayer = false;
-									w1Time = 0;
-									w2Time = 0;
-								}
-								NegDetPositions.Fill();
 							}
 						}
+						GroupNumber++;
 					}
-					GroupNumber++;
-				}
-				else if (userDet == bothDet) {
+					else if (userDet == bothDet) {
 
-				}
-				
-				
+					}
 
 
 
-				convertLayerPosition(reconData, Pitches, userDet, &UVWPositions);
 
-				convertCartesianPosition(reconData, userDet);
 
-				//histogram detector images with 2D histogram
-				//can have userDet implementation, not currently implemented
-				histogramXYPositions(reconData, XYpositions);
+					convertLayerPosition(reconData, Pitches, userDet, &UVWPositions);
 
-				//draw the detector images
-				
-				//works better with more runs and a contour plot, 
-				//since plotting individual runs intensity is 1, need to implement contours
-				//XYpositions.positronDET->Draw("colz");
-				/*
-				if (userDet == bothDet) {
-					XYpositions.positronDET->Draw("colz");
-					TCanvas c4("c4", "Fourth Canvas", w, h);
-					XYpositions.electronDET->Draw("colz");
-				}
-				else if (userDet == pos) {
-					XYpositions.positronDET->Draw("colz");
-				}
-				else {
-					XYpositions.electronDET->Draw("colz");
-				}
-				*/
-				
+					convertCartesianPosition(reconData, userDet, XYpositions);
 
-				//if (userDet == negDet) {
-					//histogramUVWPositions(reconData, &UVWPositions);
-		
-				//}
+					//histogram detector images with 2D histogram
+					//can have userDet implementation, not currently implemented
+					//histogramXYPositions(reconData, XYpositions);
 
-				
-				/* CALIBRATE MASK*/
+					//draw the detector images
 
-				
-				histogramElectronLayers(reconData, &UVWlayers, userDet);
-			
-				
-				//if (userDet == negDet) {
+					/* CALIBRATE MASK*/
+
+
+					histogramElectronLayers(reconData, &UVWlayers, userDet);
+
+
+					//if (userDet == negDet) {
 					histogramMaskLayers(reconData, &UVWMasklayers);
-				//}
-				
-				//TLegend* leg = new TLegend("Layers");
-				//leg->Draw();
-				//leg->AddEntry(UVWMasklayers.UVMasklayer, "UV layer");
-				//leg->AddEntry(UVWMasklayers.UWMasklayer, "UW layer");
-				//leg->AddEntry(UVWMasklayers.VWMasklayer, "WV layer");
-				
-				//needed to make root canvases interactive 
-				//Lives updates the graphs
+					//}
+
+					//TLegend* leg = new TLegend("Layers");
+					//leg->Draw();
+					//leg->AddEntry(UVWMasklayers.UVMasklayer, "UV layer");
+					//leg->AddEntry(UVWMasklayers.UWMasklayer, "UW layer");
+					//leg->AddEntry(UVWMasklayers.VWMasklayer, "WV layer");
+
+					//needed to make root canvases interactive 
+					//Lives updates the graphs
 					layersCanvas.Modified();
 					layersCanvas.Update();
-				XYPosDet.Modified();
-				XYPosDet.Update();
-				XYNegDet.Modified();
-				XYNegDet.Update();
-				UVWNeglayersCanvas.Modified();
-				UVWNeglayersCanvas.Update();
-				UVWNegMaskLayersCanvas.Modified();
-				UVWNegMaskLayersCanvas.Update();
-				UVWPoslayersCanvas.Modified();
-				UVWPoslayersCanvas.Update();
-				UVWPosMaskLayersCanvas.Modified();
-				UVWPosMaskLayersCanvas.Update();
+					XYPosDet.Modified();
+					XYPosDet.Update();
+					XYNegDet.Modified();
+					XYNegDet.Update();
+					UVWNeglayersCanvas.Modified();
+					UVWNeglayersCanvas.Update();
+					UVWNegMaskLayersCanvas.Modified();
+					UVWNegMaskLayersCanvas.Update();
+					UVWPoslayersCanvas.Modified();
+					UVWPoslayersCanvas.Update();
+					UVWPosMaskLayersCanvas.Modified();
+					UVWPosMaskLayersCanvas.Update();
 
-				rootapp->Draw();
+					rootapp->Draw();
 
-				delete data;
+					delete data;
+				}
 			}
+			TFile rawPositionFile("RawPositionInfoTree.root", "recreate");
+			NegDetPositions.Write();
 		}
-		TFile rawPositionFile("RawPositionInfoTree.root", "recreate");
-		NegDetPositions.Write();
 	}
-	else {
-		cout << "Directory does not exist, exiting" << endl;
-		exit(1);
-	}
+	//else {
+		//cout << "Directory does not exist, exiting" << endl;
+		//exit(1);
+	//}
 
 		closedir(dir);
-		//bin 0 to 200
 
-		//double scaleUV = 1.0 / UVWMasklayers.UVPosMasklayer->GetMaximum();
-		//double scaleUV = 1.0 / UVWMasklayers.UVPosMasklayer->Integral(0,200);
-		//UVWMasklayers.UVPosMasklayer->Scale(scaleUV);
-		//double scaleUW = 1.0 / UVWMasklayers.UWPosMasklayer->GetMaximum();
-		//double scaleUW = 1.0 / UVWMasklayers.UWPosMasklayer->Integral(0,200);
-		//UVWMasklayers.UWPosMasklayer->Scale(scaleUW);
-		//double scaleVW = 1.0 / UVWMasklayers.VWPosMasklayer->GetMaximum();
-		//double scaleVW = 1.0 / UVWMasklayers.VWPosMasklayer->Integral(0,200);
-		//UVWMasklayers.VWPosMasklayer->Scale(scaleVW);
-		//UVWPosMaskLayersCanvas.Modified();
-		//UVWPosMaskLayersCanvas.Update();
+	/*LOAD FROM TREE OPTION*/
+		if (sessionOption == PositionTreeRead) {
+			DataSet* reconData = new DataSet();
+			TFile* positionsFile = TFile::Open("C:/Users/TamaraB/Documents/GitHub/CalibrateDetectors/app/RawPositionInfoTree.root");
+			TTree* positionsTree = (TTree*)positionsFile->Get("Position Info for Detectors");
+			if (positionsFile == 0) {
+				cout << "File not found" << endl;
+			}
+			if (positionsTree == 0) {
+				cout << "no tree" << endl;
+			}
 
-	/*Fitting Guassians to interesting areas on the 1d Hist (detector slice)
-	Dealing with canvas 7
-	Finding bins from an axis value
-	You can use TAxis::FindBin
-	Example in case of a 2-d histogram (same for 1-d and 3-d)
-	TAxis *xaxis = h->GetXaxis();
-	TAxis *yaxis = h->GetYaxis();
-	Int_t binx = xaxis->FindBin(x);
-	Int_t biny = yaxis->FindBin(y);*/
+			positionsTreeToDataSet(positionsTree, reconData, userDet);
+			positionsFile->Close();
+
+			convertLayerPosition(reconData, Pitches, userDet, &UVWPositions);
+
+			convertCartesianPosition(reconData, userDet, XYpositions);
+
+			histogramElectronLayers(reconData, &UVWlayers, userDet);
+
+			histogramMaskLayers(reconData, &UVWMasklayers);
+	
+			//Lives updates the graphs
+			layersCanvas.Modified();
+			layersCanvas.Update();
+			XYPosDet.Modified();
+			XYPosDet.Update();
+			XYNegDet.Modified();
+			XYNegDet.Update();
+			UVWNeglayersCanvas.Modified();
+			UVWNeglayersCanvas.Update();
+			UVWNegMaskLayersCanvas.Modified();
+			UVWNegMaskLayersCanvas.Update();
+			UVWPoslayersCanvas.Modified();
+			UVWPoslayersCanvas.Update();
+			UVWPosMaskLayersCanvas.Modified();
+			UVWPosMaskLayersCanvas.Update();
+
+			rootapp->Draw();
+
+			
+		}
+
+			//bin 0 to 200
+
+			//double scaleUV = 1.0 / UVWMasklayers.UVPosMasklayer->GetMaximum();
+			//double scaleUV = 1.0 / UVWMasklayers.UVPosMasklayer->Integral(0,200);
+			//UVWMasklayers.UVPosMasklayer->Scale(scaleUV);
+			//double scaleUW = 1.0 / UVWMasklayers.UWPosMasklayer->GetMaximum();
+			//double scaleUW = 1.0 / UVWMasklayers.UWPosMasklayer->Integral(0,200);
+			//UVWMasklayers.UWPosMasklayer->Scale(scaleUW);
+			//double scaleVW = 1.0 / UVWMasklayers.VWPosMasklayer->GetMaximum();
+			//double scaleVW = 1.0 / UVWMasklayers.VWPosMasklayer->Integral(0,200);
+			//UVWMasklayers.VWPosMasklayer->Scale(scaleVW);
+			//UVWPosMaskLayersCanvas.Modified();
+			//UVWPosMaskLayersCanvas.Update();
+
+		/*Fitting Guassians to interesting areas on the 1d Hist (detector slice)
+		Dealing with canvas 7
+		Finding bins from an axis value
+		You can use TAxis::FindBin
+		Example in case of a 2-d histogram (same for 1-d and 3-d)
+		TAxis *xaxis = h->GetXaxis();
+		TAxis *yaxis = h->GetYaxis();
+		Int_t binx = xaxis->FindBin(x);
+		Int_t biny = yaxis->FindBin(y);*/
 		//TAxis *UVx = UVWMasklayers.UVMasklayer->GetXaxis();
 		//TAxis *UVy = UVWMasklayers.UVMasklayer->GetYaxis();
 
-	rootapp->Run();
-	
-	//should print out metafile of setup, AND csv dump of data. 
 
-    return 0;
+			rootapp->Run();
+
+			//should print out metafile of setup, AND csv dump of data. 
+
+			return 0;
+		
 }
 
