@@ -29,7 +29,7 @@ void checkReconstructable(DataSet* data);
 PitchPropSet calculatePitchProp();
 DataSet* sortReconData(DataSet* data);
 void convertLayerPosition(DataSet* reconData, PitchPropSet Pitches, imagingDetectors userDet, UVWpositionsHist *UVWPositions);
-void convertCartesianPosition(DataSet* reconData, imagingDetectors userDet, HistogramXY XYpositions);
+void convertCartesianPosition(DataSet* reconData, imagingDetectors userDet, HistogramXY XYpositions, HistogramElecLayers * UVWlayers, calibrateLayersHist* UVWMasklayers);
 void histogramXYPositions(DataSet *reconData, HistogramXY XYpositions);
 void histogramElectronLayers(DataSet *reconData, HistogramElecLayers *hel, imagingDetectors userDet);
 void differenceOfLayers(DataSet* reconData);

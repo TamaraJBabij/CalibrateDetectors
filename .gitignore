@@ -53,3 +53,10 @@ app/DataSetTree.root
 *.exe
 testlesstrees/Meta142919.txt
 test/Raw142919.txt
+Debug/app.ilk
+app/Debug/vc140.idb
+app/Debug/vc140.pdb
+app/Debug/vc140.idb
+app/Debug/app.pch
+macros/Debug/macros.pdb
+macros/Debug/macros.idb

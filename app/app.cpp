@@ -601,13 +601,9 @@ int main(int argc, char* argv[]) {
 
 					}
 
-
-
-
-
 					convertLayerPosition(reconData, Pitches, userDet, &UVWPositions);
 
-					convertCartesianPosition(reconData, userDet, XYpositions);
+					convertCartesianPosition(reconData, userDet, XYpositions, &UVWlayers, &UVWMasklayers);
 
 					//histogram detector images with 2D histogram
 					//can have userDet implementation, not currently implemented
@@ -618,18 +614,10 @@ int main(int argc, char* argv[]) {
 					/* CALIBRATE MASK*/
 
 
-					histogramElectronLayers(reconData, &UVWlayers, userDet);
+					//histogramElectronLayers(reconData, &UVWlayers, userDet);
 
+					//histogramMaskLayers(reconData, &UVWMasklayers);
 
-					//if (userDet == negDet) {
-					histogramMaskLayers(reconData, &UVWMasklayers);
-					//}
-
-					//TLegend* leg = new TLegend("Layers");
-					//leg->Draw();
-					//leg->AddEntry(UVWMasklayers.UVMasklayer, "UV layer");
-					//leg->AddEntry(UVWMasklayers.UWMasklayer, "UW layer");
-					//leg->AddEntry(UVWMasklayers.VWMasklayer, "WV layer");
 
 					//needed to make root canvases interactive 
 					//Lives updates the graphs
@@ -681,11 +669,11 @@ int main(int argc, char* argv[]) {
 
 			convertLayerPosition(reconData, Pitches, userDet, &UVWPositions);
 
-			convertCartesianPosition(reconData, userDet, XYpositions);
+			convertCartesianPosition(reconData, userDet, XYpositions, &UVWlayers, &UVWMasklayers);
 
-			histogramElectronLayers(reconData, &UVWlayers, userDet);
+			//histogramElectronLayers(reconData, &UVWlayers, userDet);
 
-			histogramMaskLayers(reconData, &UVWMasklayers);
+			//histogramMaskLayers(reconData, &UVWMasklayers);
 	
 			//Lives updates the graphs
 			layersCanvas.Modified();

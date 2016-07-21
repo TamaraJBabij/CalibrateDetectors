@@ -10,7 +10,7 @@
 void positionsTreeToDataSet(TTree* tree, DataSet* data, imagingDetectors userDet) {
 	Double_t u1Time, u2Time, v1Time, v2Time, w1Time, w2Time; 
 	bool ULayer, VLayer, WLayer;
-	Int_t GroupNumber; // = 1;
+	Int_t GroupNumber; 
 	Hit* h = new Hit();
 	//Set up the tree to store values from each entry of the raw data tree
 	tree->SetBranchAddress("GroupNumber", &GroupNumber);
