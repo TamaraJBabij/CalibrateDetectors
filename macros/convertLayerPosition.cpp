@@ -121,25 +121,22 @@ void convertLayerPosition(DataSet* reconData, PitchPropSet Pitches, imagingDetec
 							//cout << Unogap << endl;
 						//}
 						if (Unogap < -1) {
-							e->U = Unogap-(8/2);// -(9 / 2);
+							e->U = Unogap-(7/2);// -(9 / 2);
 						}
 						else {
-							e->U = Unogap+(8/2);// +(9 / 2);
+							e->U = Unogap+(7/2);// +(9 / 2);
 						}
-						
-						
-						
 						UVWPositions->UNegPositions->Fill(e->U);
 						//cout << "U layer: " << e->U << endl;
 					}
 					if (e->vPairs.size() == 1) {
 						double Vnogap = (negPitches.vlayer / 2)*(e->vPairs.front().line1 - e->vPairs.front().line2)+0.75;
 						//cout << "V layer: " << Vnogap << endl;
-						if (Vnogap < 0) {
-							e->V = Vnogap - (7 / 2);// -(8 / 2);
+						if (Vnogap < -0.5) {
+							e->V = Vnogap - (4);// -(8 / 2);
 						}
 						else {
-							e->V = Vnogap + (7 / 2);// +(8 / 2);
+							e->V = Vnogap + (4);// +(8 / 2);
 						}
 						UVWPositions->VNegPositions->Fill(e->V);
 						//cout << "V layer: " << e->V << endl;
@@ -148,7 +145,7 @@ void convertLayerPosition(DataSet* reconData, PitchPropSet Pitches, imagingDetec
 						//line2 0 lin1 due to electronics configuration
 						double Wnogap = (negPitches.wlayer / 2)*(e->wPairs.front().line1 - e->wPairs.front().line2)+1.05;
 						//cout << "W layer: " << Wnogap << endl;
-						if (Wnogap < 0.5) {
+						if (Wnogap < -0.5) {
 							e->W = Wnogap -(7 / 2);// -(8 / 2);
 						}
 						else {
