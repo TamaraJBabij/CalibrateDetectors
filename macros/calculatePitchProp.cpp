@@ -31,9 +31,9 @@ PitchPropSet calculatePitchProp() {
 	upospitch = LENGTH_pU / 140.42;
 	vpospitch = LENGTH_pV / 136.27;
 	wpospitch = LENGTH_pW / 132.62;
-	unegpitch = LENGTH_eU / 123.00; //124.14;
-	vnegpitch = LENGTH_eV / 124.89; //124.89;
-	wnegpitch = LENGTH_eW / 117.39;//117.39;
+	unegpitch = LENGTH_eU / 122.00; //124.14;
+	vnegpitch = LENGTH_eV / 126.00; //124.89;
+	wnegpitch = LENGTH_eW / 117.00;//117.39;
 
 	Pitches.setPitchProp(positive, upospitch, vpospitch, wpospitch);
 	Pitches.setPitchProp(negative, unegpitch, vnegpitch, wnegpitch);

@@ -655,7 +655,7 @@ int main(int argc, char* argv[]) {
 	/*LOAD FROM TREE OPTION*/
 		if (sessionOption == PositionTreeRead) {
 			DataSet* reconData = new DataSet();
-			TFile* positionsFile = TFile::Open("C:/Users/TamaraB/Documents/GitHub/CalibrateDetectors/app/RawPositionInfoTree.root");
+			TFile* positionsFile = TFile::Open("C:/Users/Tamara/Documents/GitHub/CalibrateDetectors/app/RawPositionInfoTree.root");
 			TTree* positionsTree = (TTree*)positionsFile->Get("Position Info for Detectors");
 			if (positionsFile == 0) {
 				cout << "File not found" << endl;

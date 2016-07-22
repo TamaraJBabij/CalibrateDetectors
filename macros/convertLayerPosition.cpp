@@ -116,21 +116,21 @@ void convertLayerPosition(DataSet* reconData, PitchPropSet Pitches, imagingDetec
 						//line2 - line 1 as u1 and u2 reversed (u2 on right hand side) x = righthandside-lefthandside
 						//double Unogap = (negPitches.ulayer / 2)*(e->uPairs.front().line1 - e->uPairs.front().line2);
 						//cout << "U layer: " << Unogap << endl;
-						double Unogap = (negPitches.ulayer / 2)*(e->uPairs.front().line1 - e->uPairs.front().line2) + 2.65;// +2.55 + 0.2;
+						double Unogap = (negPitches.ulayer / 2)*(e->uPairs.front().line1 - e->uPairs.front().line2) + 2.65;
 						//if (Unogap < 0 && Unogap>-3) {
 							//cout << Unogap << endl;
 						//}
 						if (Unogap < -1) {
-							e->U = Unogap-(7/2);// -(9 / 2);
+							e->U = Unogap-(7.5/2);// -(9 / 2);
 						}
 						else {
-							e->U = Unogap+(7/2);// +(9 / 2);
+							e->U = Unogap+(7.5/2);// +(9 / 2);
 						}
 						UVWPositions->UNegPositions->Fill(e->U);
 						//cout << "U layer: " << e->U << endl;
 					}
 					if (e->vPairs.size() == 1) {
-						double Vnogap = (negPitches.vlayer / 2)*(e->vPairs.front().line1 - e->vPairs.front().line2)+0.75;
+						double Vnogap = (negPitches.vlayer / 2)*(e->vPairs.front().line1 - e->vPairs.front().line2) + 1.4;//+ 0.75;
 						//cout << "V layer: " << Vnogap << endl;
 						if (Vnogap < -0.5) {
 							e->V = Vnogap - (4);// -(8 / 2);
@@ -143,13 +143,13 @@ void convertLayerPosition(DataSet* reconData, PitchPropSet Pitches, imagingDetec
 					}
 					if (e->wPairs.size() == 1) {
 						//line2 0 lin1 due to electronics configuration
-						double Wnogap = (negPitches.wlayer / 2)*(e->wPairs.front().line1 - e->wPairs.front().line2)+1.05;
+						double Wnogap = (negPitches.wlayer / 2)*(e->wPairs.front().line1 - e->wPairs.front().line2) + 0.25;//+ 1.05;
 						//cout << "W layer: " << Wnogap << endl;
 						if (Wnogap < -0.5) {
-							e->W = Wnogap -(7 / 2);// -(8 / 2);
+							e->W = Wnogap -(6 / 2);// -(8 / 2);
 						}
 						else {
-							e->W = Wnogap +(7 / 2);// +(8 / 2);
+							e->W = Wnogap +(6 / 2);// +(8 / 2);
 						}
 						UVWPositions->WNegPositions->Fill(e->W);
 						//cout << "W layer: " << e->W << endl;
