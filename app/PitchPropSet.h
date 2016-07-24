@@ -14,5 +14,6 @@ private:
 	PitchPropData negPitch;
 public:
 	void setPitchProp(Charge charge, double uOffset, double uPitchProp, double vOffset, double vPitchProp, double wOffset, double wPitchProp);
+	void setPitchProp(Charge charge, PitchPropData data);
 	PitchPropData getPitchProp(Charge charge);
 };

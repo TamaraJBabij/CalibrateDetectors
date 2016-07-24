@@ -15,23 +15,25 @@ void histogramElectronLayers(DataSet *reconData, HistogramElecLayers * UVWlayers
 	//Particle is subset of event and contains time and x, y
 
 	for (Group* g : *reconData) {
-		if (g->negative.xy_uv == true) {
-			UVWlayers->UVlayers->Fill(g->negative.x_uv, g->negative.y_uv);
-		}
-		if (g->negative.xy_uw == true) {
-			UVWlayers->UWlayers->Fill(g->negative.x_uw, g->negative.y_uw);
-		}
-		if (g->negative.xy_vw == true) {
-			UVWlayers->VWlayers->Fill(g->negative.x_vw, g->negative.y_vw);
-		}
-		if (g->positive.xy_uv == true) {
-			UVWlayers->UVPoslayers->Fill(g->positive.x_uv, g->positive.y_uv);
-		}
-		if (g->positive.xy_uw == true) {
-			UVWlayers->UWPoslayers->Fill(g->positive.x_uw, g->positive.y_uw);
-		}
-		if (g->positive.xy_vw == true) {
-			UVWlayers->VWPoslayers->Fill(g->positive.x_vw, g->positive.y_vw);
+		for (Event* e : g->events) {
+			if (e->negative.xy_uv == true) {
+				UVWlayers->UVlayers->Fill(e->negative.x_uv, e->negative.y_uv);
+			}
+			if (e->negative.xy_uw == true) {
+				UVWlayers->UWlayers->Fill(e->negative.x_uw, e->negative.y_uw);
+			}
+			if (e->negative.xy_vw == true) {
+				UVWlayers->VWlayers->Fill(e->negative.x_vw, e->negative.y_vw);
+			}
+			if (e->positive.xy_uv == true) {
+				UVWlayers->UVPoslayers->Fill(e->positive.x_uv, e->positive.y_uv);
+			}
+			if (e->positive.xy_uw == true) {
+				UVWlayers->UWPoslayers->Fill(e->positive.x_uw, e->positive.y_uw);
+			}
+			if (e->positive.xy_vw == true) {
+				UVWlayers->VWPoslayers->Fill(e->positive.x_vw, e->positive.y_vw);
+			}
 		}
 	}
 }
