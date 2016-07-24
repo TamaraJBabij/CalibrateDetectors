@@ -147,6 +147,7 @@
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClInclude Include="calibrateLayersHist.h" />
+    <ClInclude Include="CalibrationParameters.h" />
     <ClInclude Include="configlayers.h" />
     <ClInclude Include="Constants.h" />
     <ClInclude Include="DataSet.h" />

@@ -13,6 +13,6 @@ private:
 	PitchPropData posPitch;
 	PitchPropData negPitch;
 public:
-	void setPitchProp(Charge charge, double ulayer, double vlayer, double wlayer);
+	void setPitchProp(Charge charge, double uOffset, double uPitchProp, double vOffset, double vPitchProp, double wOffset, double wPitchProp);
 	PitchPropData getPitchProp(Charge charge);
 };

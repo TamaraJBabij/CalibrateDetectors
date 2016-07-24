@@ -667,6 +667,8 @@ int main(int argc, char* argv[]) {
 			positionsTreeToDataSet(positionsTree, reconData, userDet);
 			positionsFile->Close();
 
+			CalibrationParameters params = getCalibrationParameters(reconData);
+
 			convertLayerPosition(reconData, Pitches, userDet, &UVWPositions);
 
 			convertCartesianPosition(reconData, userDet, XYpositions, &UVWlayers, &UVWMasklayers);

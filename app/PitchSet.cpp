@@ -3,11 +3,14 @@
 #include <vector>
 #include "Constants.h"
 
-void PitchPropSet::setPitchProp(Charge charge, double ulayer, double vlayer, double wlayer) {
+void PitchPropSet::setPitchProp(Charge charge, double uOffset, double uPitchProp, double vOffset, double vPitchProp, double wOffset, double wPitchProp) {
 	PitchPropData data;
-	data.ulayer = ulayer;
-	data.vlayer = vlayer;
-	data.wlayer = wlayer;
+	data.uPitchProp = uPitchProp;
+	data.vPitchProp = vPitchProp;
+	data.wPitchProp = wPitchProp;
+	data.uOffset = uOffset;
+	data.vOffset = vOffset;
+	data.wOffset = wOffset;
 
 	if (charge == positive) {
 		posPitch = data;
