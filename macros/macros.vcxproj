@@ -127,6 +127,7 @@
     <ClCompile Include="convertLayerPosition.cpp" />
     <ClCompile Include="differenceOfLayers.cpp" />
     <ClCompile Include="firstCut.cpp" />
+    <ClCompile Include="getCalibrationParameters.cpp" />
     <ClCompile Include="histogramDifferenceElecLayers.cpp" />
     <ClCompile Include="histogramElectronLayers.cpp" />
     <ClCompile Include="histogramMaskLayers.cpp" />

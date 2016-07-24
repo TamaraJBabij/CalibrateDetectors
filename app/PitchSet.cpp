@@ -11,7 +11,10 @@ void PitchPropSet::setPitchProp(Charge charge, double uOffset, double uPitchProp
 	data.uOffset = uOffset;
 	data.vOffset = vOffset;
 	data.wOffset = wOffset;
+	setPitchProp(charge, data);
+}
 
+void PitchPropSet::setPitchProp(Charge charge, PitchPropData data) {
 	if (charge == positive) {
 		posPitch = data;
 	}

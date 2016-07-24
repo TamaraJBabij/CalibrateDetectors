@@ -93,6 +93,9 @@
     <ClCompile Include="positionsTreeToDataSet.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="getCalibrationParameters.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="configuration.h">

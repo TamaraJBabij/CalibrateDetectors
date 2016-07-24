@@ -16,20 +16,22 @@ void histogramXYPositions(DataSet *reconData, HistogramXY XYpositions) {
 	
 
 	for (Group* g : *reconData) {
-		//cout << "x " << g->positive.x << endl;
-		if (g->positive.x) {
-			if (g->positive.y) {
-				XYpositions.positronDET->Fill(g->positive.x, g->positive.y);
+		for (Event* e : g->events) {
+			//cout << "x " << e->positive.x << endl;
+			if (e->positive.x) {
+				if (e->positive.y) {
+					XYpositions.positronDET->Fill(e->positive.x, e->positive.y);
+				}
 			}
-		}
-		if (g->negative.x ) {
-			if (g->negative.y) {
-				XYpositions.electronDET->Fill(g->negative.x, g->negative.y);
-				cout << "hist fill" << endl;
+			if (e->negative.x) {
+				if (e->negative.y) {
+					XYpositions.electronDET->Fill(e->negative.x, e->negative.y);
+					cout << "hist fill" << endl;
+				}
 			}
+			//XYpositions.positronDET->Fill(e->positive.x, e->positive.y);
+			//XYpositions.electronDET->Fill(e->negative.x, e->negative.y);
 		}
-		//XYpositions.positronDET->Fill(g->positive.x, g->positive.y);
-		//XYpositions.electronDET->Fill(g->negative.x, g->negative.y);
 	}
 	
 }

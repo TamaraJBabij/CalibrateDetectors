@@ -603,7 +603,7 @@ int main(int argc, char* argv[]) {
 
 					convertLayerPosition(reconData, Pitches, userDet, &UVWPositions);
 
-					convertCartesianPosition(reconData, userDet, XYpositions, &UVWlayers, &UVWMasklayers);
+					convertCartesianPosition(reconData, userDet, &XYpositions, &UVWlayers, &UVWMasklayers);
 
 					//histogram detector images with 2D histogram
 					//can have userDet implementation, not currently implemented
@@ -667,11 +667,30 @@ int main(int argc, char* argv[]) {
 			positionsTreeToDataSet(positionsTree, reconData, userDet);
 			positionsFile->Close();
 
-			CalibrationParameters params = getCalibrationParameters(reconData);
+			convertLayerPosition(reconData, Pitches, userDet);
 
-			convertLayerPosition(reconData, Pitches, userDet, &UVWPositions);
+			convertCartesianPosition(reconData, userDet);
 
-			convertCartesianPosition(reconData, userDet, XYpositions, &UVWlayers, &UVWMasklayers);
+			PitchPropSet calibrated;
+			PitchPropData params = getCalibrationParameters(reconData, Pitches, userDet);
+
+			if (userDet == negDet) {
+				calibrated.setPitchProp(negative, params);
+			}
+			if (userDet == posDet) {
+				calibrated.setPitchProp(positive, params);
+			}
+
+			convertLayerPosition(reconData, calibrated, userDet);
+
+			convertCartesianPosition(reconData, userDet);
+
+			getCalibrationParameters(reconData, calibrated, userDet);
+
+
+			convertLayerPosition(reconData, calibrated, userDet, &UVWPositions);
+
+			convertCartesianPosition(reconData, userDet, &XYpositions, &UVWlayers, &UVWMasklayers);
 
 			//histogramElectronLayers(reconData, &UVWlayers, userDet);
 
