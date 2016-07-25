@@ -27,7 +27,7 @@ void convertCartesianPosition(DataSet* reconData, imagingDetectors userDet, Hist
 					if (e->uPairs.size() == 1 && e->vPairs.size() == 1) {
 						//g->positron = Particle(32,23123,2341)
 						p.x_uv = e->U;
-						p.y_uv = (1 / sqrt(3))*(e->U - 2 * e->V);
+						p.y_uv = (1.0 / sqrt(3))*(e->U - 2 * e->V);
 						p.x += p.x_uv;
 						p.y += p.y_uv;
 						count++;
@@ -36,7 +36,7 @@ void convertCartesianPosition(DataSet* reconData, imagingDetectors userDet, Hist
 					}
 					else if (e->uPairs.size() == 1 && e->wPairs.size() == 1) {
 						p.x_uw = e->U;
-						p.y_uw = (1 / sqrt(3))*(2 * e->W - e->U);
+						p.y_uw = (1.0 / sqrt(3))*(2 * e->W - e->U);
 						p.x += p.x_uw;
 						p.y += p.y_uw;
 						count++;
@@ -45,7 +45,7 @@ void convertCartesianPosition(DataSet* reconData, imagingDetectors userDet, Hist
 					}
 					else if (e->vPairs.size() == 1 && e->wPairs.size() == 1) {
 						p.x_vw = e->V + e->W;
-						p.y_vw = (1 / sqrt(3))*(e->W - e->V);
+						p.y_vw = (1.0 / sqrt(3))*(e->W - e->V);
 						p.x += p.x_vw;
 						p.y += p.y_vw;
 						count++;
@@ -74,14 +74,14 @@ void convertCartesianPosition(DataSet* reconData, imagingDetectors userDet, Hist
 						//see logbook 9 page 114 for diagram of electron detector
 						p.x_uv = e->U;
 						p.x += p.x_uv;
-						p.y_uv = (1 / sqrt(3))*(-e->U + 2 * e->V);
+						p.y_uv = (1.0 / sqrt(3))*(-e->U + 2 * e->V);
 						p.y += p.y_uv;
 						count++;
 						p.xy_uv = true;
 					}
 					if (e->uPairs.size() == 1 && e->wPairs.size() == 1) {
 						p.x_uw = e->U;
-						p.y_uw = (1 / sqrt(3))*(2 * e->W + e->U);
+						p.y_uw = (1.0 / sqrt(3))*(2 * e->W + e->U);
 						p.x += p.x_uw;
 						p.y += p.y_uw;
 						count++;
@@ -89,7 +89,7 @@ void convertCartesianPosition(DataSet* reconData, imagingDetectors userDet, Hist
 					}
 					if (e->vPairs.size() == 1 && e->wPairs.size() == 1) {
 						p.x_vw = e->V + e->W;
-						p.y_vw = (1 / sqrt(3))*(e->W + e->V);
+						p.y_vw = (1.0 / sqrt(3))*(e->W + e->V);
 						p.x += p.x_vw;
 						p.y += p.y_vw;
 						count++;
@@ -120,8 +120,8 @@ void convertCartesianPosition(DataSet* reconData, imagingDetectors userDet, Hist
 					if (e->uPairs.size() == 1 && e->vPairs.size() == 1) {
 						//g->positron = Particle(32,23123,2341)
 						p.x_uv = -e->U;
-						//p.y_uv = (1 / sqrt(3))*(e->U - 2 * e->V);
-						p.y_uv = (1 / sqrt(3))*( e->U - 2 * e->V);
+						//p.y_uv = (1.0 / sqrt(3))*(e->U - 2 * e->V);
+						p.y_uv = (1.0 / sqrt(3))*( e->U - 2 * e->V);
 						p.x += p.x_uv;
 						p.y += p.y_uv;
 						count++;
@@ -129,8 +129,8 @@ void convertCartesianPosition(DataSet* reconData, imagingDetectors userDet, Hist
 					}
 					else if (e->uPairs.size() == 1 && e->wPairs.size() == 1) {
 						p.x_uw = -e->U;
-						//p.y_uw = (1 / sqrt(3))*(2 * e->W - e->U);
-						p.y_uw = (1 / sqrt(3))*(2 * e->W - e->U);
+						//p.y_uw = (1.0 / sqrt(3))*(2 * e->W - e->U);
+						p.y_uw = (1.0 / sqrt(3))*(2 * e->W - e->U);
 						p.x += p.x_uw;
 						p.y += p.y_uw;
 						count++;
@@ -138,8 +138,8 @@ void convertCartesianPosition(DataSet* reconData, imagingDetectors userDet, Hist
 					}
 					else if (e->vPairs.size() == 1 && e->wPairs.size() == 1) {
 						p.x_vw = - e->W - e->V; //v+w
-						//p.y_vw = (1 / sqrt(3))*(e->W - e->V);
-						p.y_vw = (1 / sqrt(3))*(e->W - e->V);
+						//p.y_vw = (1.0 / sqrt(3))*(e->W - e->V);
+						p.y_vw = (1.0 / sqrt(3))*(e->W - e->V);
 						p.x += p.x_vw;
 						p.y += p.y_vw;
 						count++;
@@ -175,7 +175,7 @@ void convertCartesianPosition(DataSet* reconData, imagingDetectors userDet, Hist
 						//see logbook 9 page 114 for diagram of electron detector
 						p.x_uv = e->U;
 						p.x += p.x_uv;
-						p.y_uv = (1 / sqrt(3))*(-e->U + 2 * e->V);
+						p.y_uv = (1.0 / sqrt(3))*(-e->U + 2 * e->V);
 						p.y += p.y_uv;
 						count++;
 						p.xy_uv = true;
@@ -186,7 +186,7 @@ void convertCartesianPosition(DataSet* reconData, imagingDetectors userDet, Hist
 					}
 					if (e->uPairs.size() == 1 && e->wPairs.size() == 1) {
 						p.x_uw = e->U;
-						p.y_uw = (1 / sqrt(3))*(2 * e->W + e->U);
+						p.y_uw = (1.0 / sqrt(3))*(2 * e->W + e->U);
 						p.x += p.x_uw;
 						p.y += p.y_uw;
 						count++;
@@ -198,7 +198,7 @@ void convertCartesianPosition(DataSet* reconData, imagingDetectors userDet, Hist
 					}
 					if (e->vPairs.size() == 1 && e->wPairs.size() == 1) {
 						p.x_vw = e->V - e->W;
-						p.y_vw = (1 / sqrt(3))*(e->W + e->V);
+						p.y_vw = (1.0 / sqrt(3))*(e->W + e->V);
 						p.x += p.x_vw;
 						p.y += p.y_vw;
 						count++;

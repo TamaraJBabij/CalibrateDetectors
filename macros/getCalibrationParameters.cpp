@@ -82,22 +82,22 @@ PitchPropData getCalibrationParameters(DataSet* dataSet, PitchPropSet initial, i
 				Bu -= 2 * x;
 
 				// Coeffs for y^2
-				Av2 += 4.0 / 3 * v * v;
-				AvBv += 2 * 4.0 / 3 * v;
-				AuAv -= 2 * 2.0 / 3 * v * u;
-				AvBu -= 2 * 2.0 / 3 * v;
+				Av2 += (4.0 / 3) * v * v;
+				AvBv += 2 * (4.0 / 3) * v;
+				AuAv -= 2 * (2.0 / 3) * v * u;
+				AvBu -= 2 * (2.0 / 3) * v;
 				Av -= 2 * 2 * sqrtThird * v * y;
 
-				Bv2 += 4.0 / 3;
-				AuBv -= 2 * 2.0 / 3 * u;
-				BuBv -= 2 * 2.0 / 3;
+				Bv2 += (4.0 / 3);
+				AuBv -= 2 * (2.0 / 3) * u;
+				BuBv -= 2 * (2.0 / 3);
 				Bv -= 2 * 2 * sqrtThird * y;
 
-				Au2 += 1.0 / 3 * u * u;
-				AuBu += 2 * 1.0 / 3 * u;
+				Au2 += (1.0 / 3) * u * u;
+				AuBu += 2 * (1.0 / 3) * u;
 				Au += 2 * sqrtThird * u * y;
 
-				Bu2 += 1.0 / 3;
+				Bu2 += (1.0 / 3);
 				Bu += 2 * sqrtThird * y;
 
 				C += x * x + y * y;
@@ -118,22 +118,22 @@ PitchPropData getCalibrationParameters(DataSet* dataSet, PitchPropSet initial, i
 				Bu -= 2 * x;
 
 				// Coeffs for y^2
-				Aw2 += 4.0 / 3 * w * w;
-				AwBw += 2 * 4.0 / 3 * w;
-				AuAw += 2 * 2.0 / 3 * w * u;
-				AwBu += 2 * 2.0 / 3 * w;
+				Aw2 += (4.0 / 3) * w * w;
+				AwBw += 2 * (4.0 / 3) * w;
+				AuAw += 2 * (2.0 / 3) * w * u;
+				AwBu += 2 * (2.0 / 3) * w;
 				Aw -= 2 * 2 * sqrtThird * w * y;
 
-				Bw2 += 4.0 / 3;
-				AuBw += 2 * 2.0 / 3 * u;
-				BuBw += 2 * 2.0 / 3;
+				Bw2 += (4.0 / 3);
+				AuBw += 2 * (2.0 / 3) * u;
+				BuBw += 2 * (2.0 / 3);
 				Bw -= 2 * 2 * sqrtThird * y;
 
-				Au2 += 1.0 / 3 * u * u;
-				AuBu += 2 * 1.0 / 3 * u;
+				Au2 += (1.0 / 3) * u * u;
+				AuBu += 2 * (1.0 / 3) * u;
 				Au -= 2 * sqrtThird * u * y;
 
-				Bu2 += 1.0 / 3;
+				Bu2 += (1.0 / 3);
 				Bu -= 2 * sqrtThird * y;
 				C += x * x + y * y;
 			}
@@ -165,22 +165,22 @@ PitchPropData getCalibrationParameters(DataSet* dataSet, PitchPropSet initial, i
 
 
 				// Coeffs for y^2
-				Aw2 += 1.0 / 3 * w * w;
-				AwBw += 2 * 1.0 / 3 * w;
-				AvAw += 2 * 1.0 / 3 * w * v;
-				AwBv += 2 * 1.0 / 3 * w;
-				Aw -= 2 * 2 * sqrtThird * w * y;
+				Aw2 += (1.0 / 3) * w * w;
+				AwBw += 2 * (1.0 / 3) * w;
+				AvAw += 2 * (1.0 / 3) * w * v;
+				AwBv += 2 * (1.0 / 3) * w;
+				Aw -= 2 * sqrtThird * w * y;
 
-				Bw2 += 1.0 / 3;
-				AvBw += 2 * 1.0 / 3 * v;
-				BvBw += 2 * 1.0 / 3;
-				Bw -= 2 * 2 * sqrtThird * y;
+				Bw2 += (1.0 / 3);
+				AvBw += 2 * (1.0 / 3) * v;
+				BvBw += 2 * (1.0 / 3);
+				Bw -= 2 * sqrtThird * y;
 
-				Av2 += 1.0 / 3 * v * v;
-				AvBv += 2 * 1.0 / 3 * v;
+				Av2 += (1.0 / 3) * v * v;
+				AvBv += 2 * (1.0 / 3) * v;
 				Av -= 2 * sqrtThird * v * y;
 
-				Bv2 += 1.0 / 3;
+				Bv2 += (1.0 / 3);
 				Bv -= 2 * sqrtThird * y;
 				C += x * x + y * y;
 			}

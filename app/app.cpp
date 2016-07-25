@@ -705,7 +705,15 @@ int main(int argc, char* argv[]) {
 
 			convertCartesianPosition(reconData, userDet);
 
-			//only works for negative detector, as cartesian reconstruction varies with detector
+			// add a neighbour count to each event in the dataset
+			checkDensity(reconData, userDet);
+
+			// 1. make a new th1i called densityHist at the top of the code to put the density in
+
+			// put the density (neighbour count) from each event into the histogram
+			histogramDensity(reconData, userDet, &densityHist);
+
+/*			//only works for negative detector, as cartesian reconstruction varies with detector
 			PitchPropSet calibrated;
 			PitchPropData params = getCalibrationParameters(reconData, Pitches, userDet);
 
@@ -720,12 +728,9 @@ int main(int argc, char* argv[]) {
 
 			convertCartesianPosition(reconData, userDet);
 
-			getCalibrationParameters(reconData, calibrated, userDet);
-
-
 			convertLayerPosition(reconData, calibrated, userDet, &UVWPositions);
 
-			convertCartesianPosition(reconData, userDet, &XYpositions, &UVWlayers, &UVWMasklayers);
+			convertCartesianPosition(reconData, userDet, &XYpositions, &UVWlayers, &UVWMasklayers); */
 
 			//histogramElectronLayers(reconData, &UVWlayers, userDet);
 
