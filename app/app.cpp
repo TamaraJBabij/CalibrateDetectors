@@ -34,15 +34,17 @@
 #include <TAxis.h>
 #include "HistUVWPositions.h"
 
-
 using namespace std;
 
-//this will eventually take data from the DAQ software Dan Murtagh wrote
-//During testing the program will take in folders like the main analysis software
-//This programs purpose is to provide live updating images of the detectors as well as time spectra
-//sould be two options 1. Find TS fits and save to tree for later use in program and/or 2. create one or two detector images and time spectra
-//this program will not select out for particles and will use all reconstructable hits to produce an image
-// Author: Tamara J Babij
+/*CALIBRATION PROGRAM FOR DETECTORS
+* Note: data being parsed into program must be detectors with the calibration mask on
+* Two options for loading in data: 1. read, read in the raw data trees, process timesums for the first tree, then obtain X,Y images. 
+* After initial processing, this option also loads all layer timing info, u1, u2, v1..... etc into a tree that can be used for the second option.
+* 2. load, This option loads the tree produced in option 1, this allows for initial processing and loading to be skipped. Essentially data is loaded in
+* at the point where it is ready to be orocessed using the variables in need of calibration. Allows for quicker chanigng of variables and processing. 
+* This program does not select out for particles and will use all reconstructable hits to produce an image
+* Author: Tamara J Babij 
+* version control of software found on: https://github.com/TamaraJBabij/CalibrateDetectors/  */
 
 int main(int argc, char* argv[]) {
 	//Initial function to set up the debug environment
@@ -55,14 +57,10 @@ int main(int argc, char* argv[]) {
 	DataSet* data = scanFiles();
 	*/
 
-	//In some cases may want to only image one detector, this will save processing time by skipping 
-	// not needed detector
-
+	/*Implementation of detinput allows for calibration of one detector at a time*/
 	string detinput;
-
 	cout << "what detectors do you want to image: neg, pos or both? " << endl;
 	cin >> detinput;
-
 	imagingDetectors userDet;
 	if (detinput.compare("pos") == 0) {
 		userDet = posDet;
@@ -82,8 +80,11 @@ int main(int argc, char* argv[]) {
 	}
 
 	//	Load from the DAQ tree files, then load from from raw positions tree
+	/*loadtype allows for two options of data processing, either loading in the raw DAQ trees, doing initial processing (timesum checks etc) 
+	and then saving timing info to a second tree, i.e. u1, u2, v1 etc. This allows for quicker detector calibration without having to reload the 
+	raw DAQ trees each time. It also takes up less of the visual studio virtual memory. */
 	string loadtype;
-	cout << "Would you like to run program to read in DAQ files (type: read), or to load a raw positions tree (type: load)" << endl;
+	cout << "Would you like to run program to read in DAQ files (type: read), or to load a raw positions tree (type: load), or create (type:create)" << endl;
 	cin >> loadtype;
 	CalibrateLoadType sessionOption;
 	if (loadtype.compare("read") == 0) {
@@ -92,10 +93,25 @@ int main(int argc, char* argv[]) {
 	else if (loadtype.compare("load") == 0) {
 		sessionOption = PositionTreeRead;
 	}
+	else if (loadtype.compare("create") == 0) {
+		sessionOption = PositionTreeCreate;
+	}
+
+	HistogramXY XYpositions;
+	/*create fake mask data X,Y tree*/
+	if (sessionOption == PositionTreeCreate) {
+		//run data model and then exit
+		TCanvas createdDataCanvas("Data", "X,Y positions");
+		XYpositions.modeldataNegDET = new TH2D("electronDET", "Electrons", 400, -60, 60, 400, -60, 60);
+		//run create data program
+		createMaskDataTree(userDet, &XYpositions, sessionOption);
+		XYpositions.modeldataNegDET->Draw();
+		//exit(1);
+	}
 
 
-
-	//scans folder and loads all tree ( .root) files into the dataset
+	//scans folder created by the DAQ software and loads all tree ( .root) files into the dataset
+	//not currently neccasary for the load options
 	string fileLocation;
 	cout << "what is the directory? remember to add a backslash at the end" << endl;
 	cin >> fileLocation;
@@ -168,7 +184,7 @@ int main(int argc, char* argv[]) {
 
 	TCanvas XYPosDet("Positive Detector", "XY Positions", canvasWidth, h);
 	TCanvas XYNegDet("Negative Detector", "XY Positions", canvasWidth, h);
-	HistogramXY XYpositions;
+	
 	if (userDet == bothDet) {
 		XYpositions.positronDET = new TH2D("positronDET", "Positrons", 400, -60, 60, 400, -60, 60);
 		XYpositions.electronDET = new TH2D("electronDET", "Electrons", 400, -60, 60, 400, -60, 60);
@@ -192,7 +208,8 @@ int main(int argc, char* argv[]) {
 	calibrateLayersHist UVWMasklayers;
 	TCanvas UVWNeglayersCanvas("UVW layers Canvas", "UVW Negative Detector", canvasWidth, h);
 	TCanvas UVWPoslayersCanvas("UVW layers Canvas", "UVW Positive Detctor", canvasWidth, h);
-	TCanvas UVWNegMaskLayersCanvas("UVWMaskLayersCanvas", "UVW Negative Detector Layers");
+	TCanvas UVWNegMaskLayersCanvasX("UVWMaskLayersCanvas", "UVW Negative Detector Layers, X vs Int");
+	TCanvas UVWNegMaskLayersCanvasY("UVWMaskLayersCanvas", "UVW Negative Detector Layers, y vs Int");
 	TCanvas UVWPosMaskLayersCanvas("UVWMaskLayersCanvas", "UVW Positive Detector Layers");
 	if (userDet == negDet) {
 		UVWNeglayersCanvas.cd();
@@ -213,7 +230,7 @@ int main(int argc, char* argv[]) {
 		elecLegend->AddEntry(UVWlayers.UWlayers, "UW layer");
 		elecLegend->AddEntry(UVWlayers.VWlayers, "WV layer");
 		elecLegend->Draw();
-		UVWNegMaskLayersCanvas.cd();
+		UVWNegMaskLayersCanvasX.cd();
 		UVWMasklayers.UVMasklayer = new TH1D("electronDET", "UV layer", 400, -60, 60);
 		UVWMasklayers.UWMasklayer = new TH1D("electronDET", "UW layer", 400, -60, 60);
 		UVWMasklayers.VWMasklayer = new TH1D("electronDET", "VW layer", 400, -60, 60);
@@ -228,6 +245,21 @@ int main(int argc, char* argv[]) {
 		elecMaskLegend->AddEntry(UVWMasklayers.UWMasklayer, "UW layer");
 		elecMaskLegend->AddEntry(UVWMasklayers.VWMasklayer, "WV layer");
 		elecMaskLegend->Draw();
+		UVWNegMaskLayersCanvasY.cd();
+		UVWMasklayers.UVMasklayerY = new TH1D("electronDET", "UV layer", 400, -60, 60);
+		UVWMasklayers.UWMasklayerY = new TH1D("electronDET", "UW layer", 400, -60, 60);
+		UVWMasklayers.VWMasklayerY = new TH1D("electronDET", "VW layer", 400, -60, 60);
+		UVWMasklayers.UVMasklayerY->SetLineColor(kBlue);
+		UVWMasklayers.UWMasklayerY->SetLineColor(kRed);
+		UVWMasklayers.VWMasklayerY->SetLineColor(kBlack);
+		UVWMasklayers.UVMasklayerY->Draw("hist");
+		UVWMasklayers.UWMasklayerY->Draw("SameHist");
+		UVWMasklayers.VWMasklayerY->Draw("SameHist");
+		TLegend* elecMaskLegendY = new TLegend(0.1, 0.7, 0.3, 0.9, "Layers");
+		elecMaskLegendY->AddEntry(UVWMasklayers.UVMasklayerY, "UV layer");
+		elecMaskLegendY->AddEntry(UVWMasklayers.UWMasklayerY, "UW layer");
+		elecMaskLegendY->AddEntry(UVWMasklayers.VWMasklayerY, "WV layer");
+		elecMaskLegendY->Draw();
 	}
 	else if (userDet == posDet) {
 		UVWPoslayersCanvas.cd();
@@ -629,8 +661,10 @@ int main(int argc, char* argv[]) {
 					XYNegDet.Update();
 					UVWNeglayersCanvas.Modified();
 					UVWNeglayersCanvas.Update();
-					UVWNegMaskLayersCanvas.Modified();
-					UVWNegMaskLayersCanvas.Update();
+					UVWNegMaskLayersCanvasX.Modified();
+					UVWNegMaskLayersCanvasX.Update();
+					UVWNegMaskLayersCanvasY.Modified();
+					UVWNegMaskLayersCanvasY.Update();
 					UVWPoslayersCanvas.Modified();
 					UVWPoslayersCanvas.Update();
 					UVWPosMaskLayersCanvas.Modified();
@@ -671,6 +705,7 @@ int main(int argc, char* argv[]) {
 
 			convertCartesianPosition(reconData, userDet);
 
+			//only works for negative detector, as cartesian reconstruction varies with detector
 			PitchPropSet calibrated;
 			PitchPropData params = getCalibrationParameters(reconData, Pitches, userDet);
 
@@ -695,6 +730,16 @@ int main(int argc, char* argv[]) {
 			//histogramElectronLayers(reconData, &UVWlayers, userDet);
 
 			//histogramMaskLayers(reconData, &UVWMasklayers);
+
+			double scaleUV = 1.0 / UVWMasklayers.UVMasklayer->GetMaximum();
+			//double scaleUV = 1.0 / UVWMasklayers.UVMasklayer->Integral(0,200);
+			UVWMasklayers.UVMasklayer->Scale(scaleUV);
+			double scaleUW = 1.0 / UVWMasklayers.UWMasklayer->GetMaximum();
+			//double scaleUW = 1.0 / UVWMasklayers.UWMasklayer->Integral(0,200);
+			UVWMasklayers.UWMasklayer->Scale(scaleUW);
+			double scaleVW = 1.0 / UVWMasklayers.VWMasklayer->GetMaximum();
+			//double scaleVW = 1.0 / UVWMasklayers.VWMasklayer->Integral(0,200);
+			UVWMasklayers.VWMasklayer->Scale(scaleVW);
 	
 			//Lives updates the graphs
 			layersCanvas.Modified();
@@ -705,8 +750,10 @@ int main(int argc, char* argv[]) {
 			XYNegDet.Update();
 			UVWNeglayersCanvas.Modified();
 			UVWNeglayersCanvas.Update();
-			UVWNegMaskLayersCanvas.Modified();
-			UVWNegMaskLayersCanvas.Update();
+			UVWNegMaskLayersCanvasX.Modified();
+			UVWNegMaskLayersCanvasX.Update();
+			UVWNegMaskLayersCanvasY.Modified();
+			UVWNegMaskLayersCanvasY.Update();
 			UVWPoslayersCanvas.Modified();
 			UVWPoslayersCanvas.Update();
 			UVWPosMaskLayersCanvas.Modified();

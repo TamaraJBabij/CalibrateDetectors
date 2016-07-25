@@ -39,3 +39,4 @@ void histogramMaskLayers(DataSet *reconData, calibrateLayersHist *hml);
 void histogramUVWPositions(DataSet *reconData, UVWpositionsHist *UVWPositions);
 void positionsTreeToDataSet(TTree* tree, DataSet* data, imagingDetectors userDet);
 PitchPropData getCalibrationParameters(DataSet* reconData, PitchPropSet initial, imagingDetectors userDet);
+void createMaskDataTree(imagingDetectors userDet, HistogramXY* XYpositions, CalibrateLoadType sessionOption);
