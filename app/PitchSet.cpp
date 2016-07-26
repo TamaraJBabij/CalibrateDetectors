@@ -3,7 +3,7 @@
 #include <vector>
 #include "Constants.h"
 
-void PitchPropSet::setPitchProp(Charge charge, double uOffset, double uPitchProp, double vOffset, double vPitchProp, double wOffset, double wPitchProp) {
+void PitchPropSet::setPitchProp(Charge charge, double uPitchProp, double uOffset, double vPitchProp, double vOffset, double wPitchProp, double wOffset) {
 	PitchPropData data;
 	data.uPitchProp = uPitchProp;
 	data.vPitchProp = vPitchProp;

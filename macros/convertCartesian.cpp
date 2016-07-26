@@ -179,10 +179,6 @@ void convertCartesianPosition(DataSet* reconData, imagingDetectors userDet, Hist
 						p.y += p.y_uv;
 						count++;
 						p.xy_uv = true;
-						if (UVWlayers != NULL) {
-							UVWlayers->UVlayers->Fill(e->negative.x_uv, e->negative.y_uv);
-						}
-						//cout << "UV: " << p.y_uv << endl;
 					}
 					if (e->uPairs.size() == 1 && e->wPairs.size() == 1) {
 						p.x_uw = e->U;
@@ -191,10 +187,6 @@ void convertCartesianPosition(DataSet* reconData, imagingDetectors userDet, Hist
 						p.y += p.y_uw;
 						count++;
 						p.xy_uw = true;
-						if (UVWlayers != NULL) {
-							UVWlayers->UWlayers->Fill(e->negative.x_uw, e->negative.y_uw);
-						}
-						//cout << "UW: " << p.y_uw << endl;
 					}
 					if (e->vPairs.size() == 1 && e->wPairs.size() == 1) {
 						p.x_vw = e->V - e->W;
@@ -203,15 +195,18 @@ void convertCartesianPosition(DataSet* reconData, imagingDetectors userDet, Hist
 						p.y += p.y_vw;
 						count++;
 						p.xy_vw = true;
-						if (UVWlayers != NULL) {
-							UVWlayers->VWlayers->Fill(e->negative.x_vw, e->negative.y_vw);
-						}
+						
 					}
 					p.x = p.x / count;
 					p.y = p.y / count;
 					//cout << "x " << p.x << endl;
 					//cout << "y " << p.y << endl;
 					e->negative = p;
+					if (UVWlayers != NULL) {
+						UVWlayers->UVlayers->Fill(e->negative.x_uv, e->negative.y_uv);
+						UVWlayers->UWlayers->Fill(e->negative.x_uw, e->negative.y_uw);
+						UVWlayers->VWlayers->Fill(e->negative.x_vw, e->negative.y_vw);
+					}
 					if (XYpositions != NULL) {
 							XYpositions->electronDET->Fill(e->negative.x, e->negative.y);
 						if (e->negative.xy_uv == true) {

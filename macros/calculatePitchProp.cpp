@@ -48,10 +48,10 @@ PitchPropSet calculatePitchProp() {
 	cout << "wnegpitch" << wnegpitch << endl;
 	unegoffset = 2.65;
 	cout << "unegoffset" << unegoffset << endl;
-	vnegoffset = 1.4; //0.75;
+	vnegoffset = 1.40; //0.75;
 	cout << "vnegoffset" << vnegoffset << endl;
 	wnegoffset = 0.25; //1.05;
-	cout << "vnegoffset" << vnegoffset << endl;
+	cout << "wnegoffset" << wnegoffset << endl;
 	Pitches.setPitchProp(positive, upospitch, uposoffset, vpospitch, vposoffset, wpospitch, wposoffset);
 	Pitches.setPitchProp(negative, unegpitch, unegoffset, vnegpitch, vnegoffset, wnegpitch, wnegoffset);
 	return Pitches;

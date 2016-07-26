@@ -150,6 +150,11 @@ int main(int argc, char* argv[]) {
 		UVWPositions.UNegPositions->Draw("hist");
 		UVWPositions.VNegPositions->Draw("SameHist");
 		UVWPositions.WNegPositions->Draw("SameHist");
+		TLegend* negpositionsLegend = new TLegend(0.1, 0.7, 0.3, 0.9, "Layers");
+		negpositionsLegend->AddEntry(UVWPositions.UNegPositions, "U layer");
+		negpositionsLegend->AddEntry(UVWPositions.VNegPositions, "V layer");
+		negpositionsLegend->AddEntry(UVWPositions.WNegPositions, "W layer");
+		negpositionsLegend->Draw();
 	}
 	else if (userDet == posDet) {
 		UVWPositions.UPosPositions = new TH1D("Positive Detector", "U layer", 400, -60, 60);
@@ -161,6 +166,11 @@ int main(int argc, char* argv[]) {
 		UVWPositions.UPosPositions->Draw("hist");
 		UVWPositions.VPosPositions->Draw("SameHist");
 		UVWPositions.WPosPositions->Draw("SameHist");
+		TLegend* pospositionsLegend = new TLegend(0.1, 0.7, 0.3, 0.9, "Layers");
+		pospositionsLegend->AddEntry(UVWPositions.UPosPositions, "U layer");
+		pospositionsLegend->AddEntry(UVWPositions.VPosPositions, "V layer");
+		pospositionsLegend->AddEntry(UVWPositions.WPosPositions, "W layer");
+		pospositionsLegend->Draw();
 	}
 	else if (userDet == bothDet) {
 		layersCanvas.Divide(2);
@@ -174,6 +184,11 @@ int main(int argc, char* argv[]) {
 		UVWPositions.UNegPositions->Draw("hist");
 		UVWPositions.VNegPositions->Draw("SameHist");
 		UVWPositions.WNegPositions->Draw("SameHist");
+		TLegend* negpositionsLegend = new TLegend(0.1, 0.7, 0.3, 0.9, "Layers");
+		negpositionsLegend->AddEntry(UVWPositions.UNegPositions, "U layer");
+		negpositionsLegend->AddEntry(UVWPositions.VNegPositions, "V layer");
+		negpositionsLegend->AddEntry(UVWPositions.WNegPositions, "W layer");
+		negpositionsLegend->Draw();
 		layersCanvas.cd(2);
 		UVWPositions.UPosPositions = new TH1D("Positive Detector", "U layer", 400, -60, 60);
 		UVWPositions.VPosPositions = new TH1D("Positive Detector", "V layer", 400, -60, 60);
@@ -184,6 +199,11 @@ int main(int argc, char* argv[]) {
 		UVWPositions.UPosPositions->Draw("hist");
 		UVWPositions.VPosPositions->Draw("SameHist");
 		UVWPositions.WPosPositions->Draw("SameHist");
+		TLegend* pospositionsLegend = new TLegend(0.1, 0.7, 0.3, 0.9, "Layers");
+		pospositionsLegend->AddEntry(UVWPositions.UPosPositions, "U layer");
+		pospositionsLegend->AddEntry(UVWPositions.VPosPositions, "V layer");
+		pospositionsLegend->AddEntry(UVWPositions.WPosPositions, "W layer");
+		pospositionsLegend->Draw();
 	}
 	
 
@@ -782,18 +802,30 @@ int main(int argc, char* argv[]) {
 
 			convertCartesianPosition(reconData, userDet, &XYpositions, &UVWlayers, &UVWMasklayers); 
 
-			/*
-			double scaleUV = 1.0 / UVWMasklayers.UVMasklayer->GetMaximum();
-			//double scaleUV = 1.0 / UVWMasklayers.UVMasklayer->Integral(0,200);
-			UVWMasklayers.UVMasklayer->Scale(scaleUV);
-			double scaleUW = 1.0 / UVWMasklayers.UWMasklayer->GetMaximum();
-			//double scaleUW = 1.0 / UVWMasklayers.UWMasklayer->Integral(0,200);
-			UVWMasklayers.UWMasklayer->Scale(scaleUW);
-			double scaleVW = 1.0 / UVWMasklayers.VWMasklayer->GetMaximum();
-			//double scaleVW = 1.0 / UVWMasklayers.VWMasklayer->Integral(0,200);
-			UVWMasklayers.VWMasklayer->Scale(scaleVW);
-			*/
-	
+			if (userDet == negDet) {
+				double scaleUV = 1.0 / UVWMasklayers.UVMasklayer->GetMaximum();
+				UVWMasklayers.UVMasklayer->Scale(scaleUV);
+				double scaleUW = 1.0 / UVWMasklayers.UWMasklayer->GetMaximum();
+				UVWMasklayers.UWMasklayer->Scale(scaleUW);
+				double scaleVW = 1.0 / UVWMasklayers.VWMasklayer->GetMaximum();
+				UVWMasklayers.VWMasklayer->Scale(scaleVW);
+
+				double scaleUVY = 1.0 / UVWMasklayers.UVMasklayerY->GetMaximum();
+				UVWMasklayers.UVMasklayerY->Scale(scaleUVY);
+				double scaleUWY = 1.0 / UVWMasklayers.UWMasklayerY->GetMaximum();
+				UVWMasklayers.UWMasklayerY->Scale(scaleUWY);
+				double scaleVWY = 1.0 / UVWMasklayers.VWMasklayerY->GetMaximum();
+				UVWMasklayers.VWMasklayerY->Scale(scaleVWY);
+
+				double scaleUnegpositions = 1.0 / UVWPositions.UNegPositions->GetMaximum();
+				UVWPositions.UNegPositions->Scale(scaleUnegpositions);
+				double scaleVnegpositions = 1.0 / UVWPositions.VNegPositions->GetMaximum();
+				UVWPositions.VNegPositions->Scale(scaleVnegpositions);
+				double scaleWnegpositions = 1.0 / UVWPositions.WNegPositions->GetMaximum();
+				UVWPositions.WNegPositions->Scale(scaleWnegpositions);
+
+			}
+			
 			//Lives updates the graphs
 			layersCanvas.Modified();
 			layersCanvas.Update();

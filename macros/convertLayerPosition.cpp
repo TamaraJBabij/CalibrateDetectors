@@ -7,6 +7,7 @@
 #include "math.h"
 #include "Constants.h"
 #include "HistUVWPositions.h"
+#include "TMath.h"
 
 //converts from timing u1 u2 to U
 //uses pitch propogation factor to convert timing info to position info
@@ -131,13 +132,9 @@ void convertLayerPosition(DataSet* reconData, PitchPropSet Pitches, imagingDetec
 					//see logbook 9 page 114 for diagram of electron detector
 					//including gap sizes
 					if (e->uPairs.size() == 1) {
-						//line2 - line 1 as u1 and u2 reversed (u2 on right hand side) x = righthandside-lefthandside
-						//double Unogap = (negPitches.ulayer / 2)*(e->uPairs.front().line1 - e->uPairs.front().line2);
-						//cout << "U layer: " << Unogap << endl;
+						
 						double Unogap = (negPitches.uPitchProp / 2)*(e->uPairs.front().line1 - e->uPairs.front().line2) + negPitches.uOffset;
-						//if (Unogap < 0 && Unogap>-3) {
-							//cout << Unogap << endl;
-						//}
+							//cout << "unogap " << Unogap << endl;
 						if (Unogap < -1) {
 							e->U = Unogap-(7.5/2);// -(9 / 2);
 						}
@@ -148,7 +145,7 @@ void convertLayerPosition(DataSet* reconData, PitchPropSet Pitches, imagingDetec
 						if (UVWPositions != NULL) {
 							UVWPositions->UNegPositions->Fill(e->U);
 						}
-						cout << "U layer: " << e->U << endl;
+						//cout << "U layer: " << e->U << endl;
 					}
 					if (e->vPairs.size() == 1) {
 						double Vnogap = (negPitches.vPitchProp / 2)*(e->vPairs.front().line1 - e->vPairs.front().line2) + negPitches.vOffset;
@@ -162,7 +159,7 @@ void convertLayerPosition(DataSet* reconData, PitchPropSet Pitches, imagingDetec
 						if (UVWPositions != NULL) {
 							UVWPositions->VNegPositions->Fill(e->V);
 						}
-						cout << "V layer: " << e->V << endl;
+						//cout << "V layer: " << e->V << endl;
 					}
 					if (e->wPairs.size() == 1) {
 						//line2 0 lin1 due to electronics configuration
@@ -177,7 +174,7 @@ void convertLayerPosition(DataSet* reconData, PitchPropSet Pitches, imagingDetec
 						if (UVWPositions != NULL) {
 							UVWPositions->WNegPositions->Fill(e->W);
 						}
-						cout << "W layer: " << e->W << endl;
+						//cout << "W layer: " << e->W << endl;
 					}
 				}
 			}
