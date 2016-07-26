@@ -36,7 +36,8 @@ enum ParticleID
 enum CalibrateLoadType {
 	PositionTreeWrite,
 	PositionTreeRead,
-	PositionTreeCreate
+	PositionTreeCreate,
+	PositionTreeErrorCalibrate
 };
 
 struct Constants {

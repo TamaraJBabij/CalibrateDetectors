@@ -41,11 +41,17 @@ PitchPropSet calculatePitchProp() {
 	vposoffset = 0.00; 
 	wposoffset = 0.00; 
 	unegpitch = LENGTH_eU / 122.00; //124.14;
+	cout << "unegpitch" << unegpitch << endl;
 	vnegpitch = LENGTH_eV / 126.00; //124.89;
+	cout << "vnegpitch" << vnegpitch << endl;
 	wnegpitch = LENGTH_eW / 117.00;//117.39;
+	cout << "wnegpitch" << wnegpitch << endl;
 	unegoffset = 2.65;
+	cout << "unegoffset" << unegoffset << endl;
 	vnegoffset = 1.4; //0.75;
+	cout << "vnegoffset" << vnegoffset << endl;
 	wnegoffset = 0.25; //1.05;
+	cout << "vnegoffset" << vnegoffset << endl;
 	Pitches.setPitchProp(positive, upospitch, uposoffset, vpospitch, vposoffset, wpospitch, wposoffset);
 	Pitches.setPitchProp(negative, unegpitch, unegoffset, vnegpitch, vnegoffset, wnegpitch, wnegoffset);
 	return Pitches;

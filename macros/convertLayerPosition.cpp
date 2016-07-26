@@ -148,7 +148,7 @@ void convertLayerPosition(DataSet* reconData, PitchPropSet Pitches, imagingDetec
 						if (UVWPositions != NULL) {
 							UVWPositions->UNegPositions->Fill(e->U);
 						}
-						//cout << "U layer: " << e->U << endl;
+						cout << "U layer: " << e->U << endl;
 					}
 					if (e->vPairs.size() == 1) {
 						double Vnogap = (negPitches.vPitchProp / 2)*(e->vPairs.front().line1 - e->vPairs.front().line2) + negPitches.vOffset;
@@ -162,7 +162,7 @@ void convertLayerPosition(DataSet* reconData, PitchPropSet Pitches, imagingDetec
 						if (UVWPositions != NULL) {
 							UVWPositions->VNegPositions->Fill(e->V);
 						}
-						//cout << "V layer: " << e->V << endl;
+						cout << "V layer: " << e->V << endl;
 					}
 					if (e->wPairs.size() == 1) {
 						//line2 0 lin1 due to electronics configuration
@@ -177,7 +177,7 @@ void convertLayerPosition(DataSet* reconData, PitchPropSet Pitches, imagingDetec
 						if (UVWPositions != NULL) {
 							UVWPositions->WNegPositions->Fill(e->W);
 						}
-						//cout << "W layer: " << e->W << endl;
+						cout << "W layer: " << e->W << endl;
 					}
 				}
 			}

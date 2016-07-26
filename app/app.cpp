@@ -84,7 +84,7 @@ int main(int argc, char* argv[]) {
 	and then saving timing info to a second tree, i.e. u1, u2, v1 etc. This allows for quicker detector calibration without having to reload the 
 	raw DAQ trees each time. It also takes up less of the visual studio virtual memory. */
 	string loadtype;
-	cout << "Would you like to run program to read in DAQ files (type: read), or to load a raw positions tree (type: load), or create (type:create)" << endl;
+	cout << "Would you like to run program to read in DAQ files (type: read), or to load a raw positions tree (type: load), or claibrate by minimising error function (type: error),or create fake data(type:create)" << endl;
 	cin >> loadtype;
 	CalibrateLoadType sessionOption;
 	if (loadtype.compare("read") == 0) {
@@ -96,17 +96,22 @@ int main(int argc, char* argv[]) {
 	else if (loadtype.compare("create") == 0) {
 		sessionOption = PositionTreeCreate;
 	}
+	else if (loadtype.compare("error") == 0) {
+		sessionOption = PositionTreeErrorCalibrate;
+	}
 
 	HistogramXY XYpositions;
 	/*create fake mask data X,Y tree*/
+	TCanvas createdDataCanvas("Data", "X,Y positions");
+	XYpositions.modeldataNegDET = new TH2D("electronDET", "Electrons", 400, -60, 60, 400, -60, 60);
+	XYpositions.modeldataNegDET->Draw("colz");
 	if (sessionOption == PositionTreeCreate) {
 		//run data model and then exit
-		TCanvas createdDataCanvas("Data", "X,Y positions");
-		XYpositions.modeldataNegDET = new TH2D("electronDET", "Electrons", 400, -60, 60, 400, -60, 60);
 		//run create data program
 		createMaskDataTree(userDet, &XYpositions, sessionOption);
-		XYpositions.modeldataNegDET->Draw();
-		//exit(1);
+		createdDataCanvas.Modified();
+		createdDataCanvas.Update();
+		rootapp->Draw();
 	}
 
 
@@ -321,7 +326,6 @@ int main(int argc, char* argv[]) {
 		NegDetPositions.Branch("WLayer", &WLayer);
 		NegDetPositions.Branch("w1Time", &w1Time);
 		NegDetPositions.Branch("w2Time", &w2Time);
-
 		
 		TTree PosDetPositions("Position Info for Detectors", "Tree that stores position info such that calibration can be done without reloading");
 		PosDetPositions.Branch("GroupNumber", &GroupNumber);
@@ -335,8 +339,7 @@ int main(int argc, char* argv[]) {
 		PosDetPositions.Branch("WLayer", &WLayer);
 		PosDetPositions.Branch("w1Time", &w1Time);
 		PosDetPositions.Branch("w2Time", &w2Time);
-			
-			
+					
 		if (dir != NULL) {
 			while (pdir = readdir(dir)) {
 				char* fileName = pdir->d_name;
@@ -587,9 +590,6 @@ int main(int argc, char* argv[]) {
 						// setting up tree
 						//Ideally want to store tree with filename
 
-
-
-
 						for (Group* g : *reconData) {
 							for (Event* e : g->events) {
 								if (e->mcp->detector == neg) {
@@ -642,14 +642,9 @@ int main(int argc, char* argv[]) {
 					//histogramXYPositions(reconData, XYpositions);
 
 					//draw the detector images
-
-					/* CALIBRATE MASK*/
-
-
 					//histogramElectronLayers(reconData, &UVWlayers, userDet);
 
 					//histogramMaskLayers(reconData, &UVWMasklayers);
-
 
 					//needed to make root canvases interactive 
 					//Lives updates the graphs
@@ -684,10 +679,92 @@ int main(int argc, char* argv[]) {
 		//exit(1);
 	//}
 
-		closedir(dir);
-
+	closedir(dir);
 	/*LOAD FROM TREE OPTION*/
-		if (sessionOption == PositionTreeRead) {
+	if (sessionOption == PositionTreeErrorCalibrate) {
+		//attempts to calibrate detector by minimising error function
+		DataSet* reconData = new DataSet();
+		TFile* positionsFile = TFile::Open("C:/Users/Tamara/Documents/GitHub/CalibrateDetectors/app/RawPositionInfoTree.root");
+		TTree* positionsTree = (TTree*)positionsFile->Get("Position Info for Detectors");
+		if (positionsFile == 0) {
+			cout << "File not found" << endl;
+		}
+		if (positionsTree == 0) {
+			cout << "no tree" << endl;
+		}
+
+		positionsTreeToDataSet(positionsTree, reconData, userDet);
+		positionsFile->Close();
+
+		convertLayerPosition(reconData, Pitches, userDet);
+
+		convertCartesianPosition(reconData, userDet);
+
+		// add a neighbour count to each event in the dataset
+		checkDensity(reconData, userDet);
+
+		// 1. make a new th1i called densityHist at the top of the code to put the density in
+
+		// put the density (neighbour count) from each event into the histogram
+		//histogramDensity(reconData, userDet, &densityHist);
+
+		/*			//only works for negative detector, as cartesian reconstruction varies with detector
+		PitchPropSet calibrated;
+		PitchPropData params = getCalibrationParameters(reconData, Pitches, userDet);
+
+		if (userDet == negDet) {
+		calibrated.setPitchProp(negative, params);
+		}
+		if (userDet == posDet) {
+		calibrated.setPitchProp(positive, params);
+		}
+
+		convertLayerPosition(reconData, calibrated, userDet);
+
+		convertCartesianPosition(reconData, userDet);
+
+		convertLayerPosition(reconData, calibrated, userDet, &UVWPositions);
+
+		convertCartesianPosition(reconData, userDet, &XYpositions, &UVWlayers, &UVWMasklayers); */
+
+		//histogramElectronLayers(reconData, &UVWlayers, userDet);
+
+		//histogramMaskLayers(reconData, &UVWMasklayers);
+
+		double scaleUV = 1.0 / UVWMasklayers.UVMasklayer->GetMaximum();
+		//double scaleUV = 1.0 / UVWMasklayers.UVMasklayer->Integral(0,200);
+		UVWMasklayers.UVMasklayer->Scale(scaleUV);
+		double scaleUW = 1.0 / UVWMasklayers.UWMasklayer->GetMaximum();
+		//double scaleUW = 1.0 / UVWMasklayers.UWMasklayer->Integral(0,200);
+		UVWMasklayers.UWMasklayer->Scale(scaleUW);
+		double scaleVW = 1.0 / UVWMasklayers.VWMasklayer->GetMaximum();
+		//double scaleVW = 1.0 / UVWMasklayers.VWMasklayer->Integral(0,200);
+		UVWMasklayers.VWMasklayer->Scale(scaleVW);
+
+		//Lives updates the graphs
+		layersCanvas.Modified();
+		layersCanvas.Update();
+		XYPosDet.Modified();
+		XYPosDet.Update();
+		XYNegDet.Modified();
+		XYNegDet.Update();
+		UVWNeglayersCanvas.Modified();
+			UVWNeglayersCanvas.Update();
+			UVWNegMaskLayersCanvasX.Modified();
+			UVWNegMaskLayersCanvasX.Update();
+			UVWNegMaskLayersCanvasY.Modified();
+			UVWNegMaskLayersCanvasY.Update();
+			UVWPoslayersCanvas.Modified();
+			UVWPoslayersCanvas.Update();
+			UVWPosMaskLayersCanvas.Modified();
+			UVWPosMaskLayersCanvas.Update();
+
+			rootapp->Draw();
+		}
+	/*LOAD FROM TREE OPTION*/
+	if (sessionOption == PositionTreeRead) {
+			//loads from rawpositionstrees
+			//so far no calibration implemented
 			DataSet* reconData = new DataSet();
 			TFile* positionsFile = TFile::Open("C:/Users/Tamara/Documents/GitHub/CalibrateDetectors/app/RawPositionInfoTree.root");
 			TTree* positionsTree = (TTree*)positionsFile->Get("Position Info for Detectors");
@@ -695,47 +772,17 @@ int main(int argc, char* argv[]) {
 				cout << "File not found" << endl;
 			}
 			if (positionsTree == 0) {
-				cout << "no tree" << endl;
+				cout << "No position tree could be loaded" << endl;
 			}
 
 			positionsTreeToDataSet(positionsTree, reconData, userDet);
 			positionsFile->Close();
 
-			convertLayerPosition(reconData, Pitches, userDet);
+			convertLayerPosition(reconData, Pitches, userDet, &UVWPositions);
 
-			convertCartesianPosition(reconData, userDet);
+			convertCartesianPosition(reconData, userDet, &XYpositions, &UVWlayers, &UVWMasklayers); 
 
-			// add a neighbour count to each event in the dataset
-			checkDensity(reconData, userDet);
-
-			// 1. make a new th1i called densityHist at the top of the code to put the density in
-
-			// put the density (neighbour count) from each event into the histogram
-			histogramDensity(reconData, userDet, &densityHist);
-
-/*			//only works for negative detector, as cartesian reconstruction varies with detector
-			PitchPropSet calibrated;
-			PitchPropData params = getCalibrationParameters(reconData, Pitches, userDet);
-
-			if (userDet == negDet) {
-				calibrated.setPitchProp(negative, params);
-			}
-			if (userDet == posDet) {
-				calibrated.setPitchProp(positive, params);
-			}
-
-			convertLayerPosition(reconData, calibrated, userDet);
-
-			convertCartesianPosition(reconData, userDet);
-
-			convertLayerPosition(reconData, calibrated, userDet, &UVWPositions);
-
-			convertCartesianPosition(reconData, userDet, &XYpositions, &UVWlayers, &UVWMasklayers); */
-
-			//histogramElectronLayers(reconData, &UVWlayers, userDet);
-
-			//histogramMaskLayers(reconData, &UVWMasklayers);
-
+			/*
 			double scaleUV = 1.0 / UVWMasklayers.UVMasklayer->GetMaximum();
 			//double scaleUV = 1.0 / UVWMasklayers.UVMasklayer->Integral(0,200);
 			UVWMasklayers.UVMasklayer->Scale(scaleUV);
@@ -745,6 +792,7 @@ int main(int argc, char* argv[]) {
 			double scaleVW = 1.0 / UVWMasklayers.VWMasklayer->GetMaximum();
 			//double scaleVW = 1.0 / UVWMasklayers.VWMasklayer->Integral(0,200);
 			UVWMasklayers.VWMasklayer->Scale(scaleVW);
+			*/
 	
 			//Lives updates the graphs
 			layersCanvas.Modified();
@@ -765,8 +813,6 @@ int main(int argc, char* argv[]) {
 			UVWPosMaskLayersCanvas.Update();
 
 			rootapp->Draw();
-
-			
 		}
 
 			//bin 0 to 200
@@ -796,11 +842,11 @@ int main(int argc, char* argv[]) {
 		//TAxis *UVy = UVWMasklayers.UVMasklayer->GetYaxis();
 
 
-			rootapp->Run();
+	rootapp->Run();
 
 			//should print out metafile of setup, AND csv dump of data. 
 
-			return 0;
+	return 0;
 		
 }
 
