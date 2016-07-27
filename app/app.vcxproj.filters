@@ -119,7 +119,7 @@
     <ClCompile Include="PitchSet.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="histlayerSums.cpp">
+    <ClCompile Include="histlayerSums.h">
       <Filter>Header Files</Filter>
     </ClCompile>
   </ItemGroup>

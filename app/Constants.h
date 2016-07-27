@@ -37,7 +37,8 @@ enum CalibrateLoadType {
 	PositionTreeWrite,
 	PositionTreeRead,
 	PositionTreeCreate,
-	PositionTreeErrorCalibrate
+	PositionTreeErrorCalibrate,
+	PositionTreeSlope
 };
 
 struct Constants {

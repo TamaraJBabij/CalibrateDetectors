@@ -33,6 +33,7 @@
 #include <string.h>
 #include <TAxis.h>
 #include "HistUVWPositions.h"
+#include "histlayerSums.h"
 
 using namespace std;
 
@@ -98,6 +99,9 @@ int main(int argc, char* argv[]) {
 	}
 	else if (loadtype.compare("error") == 0) {
 		sessionOption = PositionTreeErrorCalibrate;
+	}
+	else if (loadtype.compare("slope") == 0) {
+		sessionOption = PositionTreeSlope;
 	}
 
 	HistogramXY XYpositions;
@@ -322,6 +326,16 @@ int main(int argc, char* argv[]) {
 		posMaskLegend->Draw();
 	}
 	
+	layerDiffHist diffHist;
+	TCanvas layerDiffs("layer diffs", "layer diffs", canvasWidth, h);
+
+	if (sessionOption == PositionTreeSlope) {
+		layerDiffs.cd();
+		diffHist.uNegLayerDiff = new  TH1D("NegDet", "U layer", 800, -150, 150);
+		diffHist.vNegLayerDiff = new  TH1D("NegDet", "V layer", 800, -150, 150);
+		diffHist.wNegLayerDiff = new  TH1D("NegDet", "W layer", 800, -150, 150);
+		diffHist.vNegLayerDiff->Draw();
+	}
 	// scans through all files in the folder
 	//  parses in all .root files (trees) created by DAQ software
 	vector<char*> files;
@@ -846,6 +860,36 @@ int main(int argc, char* argv[]) {
 
 			rootapp->Draw();
 		}
+
+	if (sessionOption == PositionTreeSlope) {
+		//loads from rawpositionstrees
+		//so far no calibration implemented
+		DataSet* reconData = new DataSet();
+		TFile* positionsFile = TFile::Open("C:/Users/Tamara/Documents/GitHub/CalibrateDetectors/app/RawPositionInfoTree.root");
+		TTree* positionsTree = (TTree*)positionsFile->Get("Position Info for Detectors");
+		if (positionsFile == 0) {
+			cout << "File not found" << endl;
+		}
+		if (positionsTree == 0) {
+			cout << "No position tree could be loaded" << endl;
+		}
+
+		positionsTreeToDataSet(positionsTree, reconData, userDet);
+		positionsFile->Close();
+
+		convertLayerPosition(reconData, Pitches, userDet);
+
+		convertCartesianPosition(reconData, userDet);
+
+		calibrateFromSlope(reconData, userDet, &diffHist);
+
+		layerDiffs.Modified();
+		layerDiffs.Update();
+
+		}
+
+		rootapp->Draw();
+
 
 			//bin 0 to 200
 

@@ -121,6 +121,7 @@
     <ClCompile Include="..\app\checkReconstructable.cpp" />
     <ClCompile Include="calculatePitchProp.cpp" />
     <ClCompile Include="calculateTimeSums.cpp" />
+    <ClCompile Include="calibrateFromSlope.cpp" />
     <ClCompile Include="checkDensity.cpp" />
     <ClCompile Include="checkTimeSums.cpp" />
     <ClCompile Include="constructEvents.cpp" />

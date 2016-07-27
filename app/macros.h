@@ -13,6 +13,7 @@
 #include "HistElecDifferences.h"
 #include "calibrateLayersHist.h"
 #include "HistUVWPositions.h"
+#include "histlayerSums.h"
 
 TTree* readWriteTree(TTree* tree);
 DataSet* loadFromTree(TTree* tree);
@@ -42,3 +43,4 @@ PitchPropData getCalibrationParameters(DataSet* reconData, PitchPropSet initial,
 void createMaskDataTree(imagingDetectors userDet, HistogramXY* XYpositions, CalibrateLoadType sessionOption);
 void checkDensity(DataSet* data, imagingDetectors userDet);
 void histogramDensity(DataSet* data, imagingDetectors userDet, TH1I hist);
+void calibrateFromSlope(DataSet* reconData, imagingDetectors userDet, layerDiffHist* diffHist);

@@ -60,3 +60,5 @@ app/Debug/vc140.idb
 app/Debug/app.pch
 macros/Debug/macros.pdb
 macros/Debug/macros.idb
+*.suo
+Debug/macros.pdb
