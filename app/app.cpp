@@ -617,7 +617,44 @@ int main(int argc, char* argv[]) {
 					*ELIMINATE PROCESSING TIME DURING CALIBRATION
 					*/
 					if (userDet == posDet) {
-
+						for (Group* g : *reconData) {
+							for (Event* e : g->events) {
+								if (e->mcp->detector == pos) {
+									if (e->uPairs.size() == 1) {
+										ULayer = true;
+										u1Time = e->uPairs.front().line1;
+										u2Time = e->uPairs.front().line2;
+									}
+									else {
+										ULayer = false;
+										u1Time = 0;
+										u2Time = 0;
+									}
+									if (e->vPairs.size() == 1) {
+										VLayer = true;
+										v1Time = e->vPairs.front().line1;
+										v2Time = e->vPairs.front().line2;
+									}
+									else {
+										VLayer = false;
+										v1Time = 0;
+										v2Time = 0;
+									}
+									if (e->wPairs.size() == 1) {
+										WLayer = true;
+										w1Time = e->wPairs.front().line1;
+										w2Time = e->wPairs.front().line2;
+									}
+									else {
+										WLayer = false;
+										w1Time = 0;
+										w2Time = 0;
+									}
+									NegDetPositions.Fill();
+								}
+							}
+						}
+						GroupNumber++;
 					}
 					else if (userDet == negDet) {
 						//Store fit parameters into a tree for later accessing
@@ -735,14 +772,14 @@ int main(int argc, char* argv[]) {
 		convertCartesianPosition(reconData, userDet);
 
 		// add a neighbour count to each event in the dataset
-		checkDensity(reconData, userDet);
+		//checkDensity(reconData, userDet);
 
 		// 1. make a new th1i called densityHist at the top of the code to put the density in
 
 		// put the density (neighbour count) from each event into the histogram
 		//histogramDensity(reconData, userDet, &densityHist);
 
-		/*			//only works for negative detector, as cartesian reconstruction varies with detector
+		//only works for negative detector, as cartesian reconstruction varies with detector
 		PitchPropSet calibrated;
 		PitchPropData params = getCalibrationParameters(reconData, Pitches, userDet);
 
@@ -759,7 +796,7 @@ int main(int argc, char* argv[]) {
 
 		convertLayerPosition(reconData, calibrated, userDet, &UVWPositions);
 
-		convertCartesianPosition(reconData, userDet, &XYpositions, &UVWlayers, &UVWMasklayers); */
+		convertCartesianPosition(reconData, userDet, &XYpositions, &UVWlayers, &UVWMasklayers); 
 
 		//histogramElectronLayers(reconData, &UVWlayers, userDet);
 
@@ -783,17 +820,17 @@ int main(int argc, char* argv[]) {
 		XYNegDet.Modified();
 		XYNegDet.Update();
 		UVWNeglayersCanvas.Modified();
-			UVWNeglayersCanvas.Update();
-			UVWNegMaskLayersCanvasX.Modified();
-			UVWNegMaskLayersCanvasX.Update();
-			UVWNegMaskLayersCanvasY.Modified();
-			UVWNegMaskLayersCanvasY.Update();
-			UVWPoslayersCanvas.Modified();
-			UVWPoslayersCanvas.Update();
-			UVWPosMaskLayersCanvas.Modified();
-			UVWPosMaskLayersCanvas.Update();
+		UVWNeglayersCanvas.Update();
+		UVWNegMaskLayersCanvasX.Modified();
+		UVWNegMaskLayersCanvasX.Update();
+		UVWNegMaskLayersCanvasY.Modified();
+		UVWNegMaskLayersCanvasY.Update();
+		UVWPoslayersCanvas.Modified();
+		UVWPoslayersCanvas.Update();
+		UVWPosMaskLayersCanvas.Modified();
+		UVWPosMaskLayersCanvas.Update();
 
-			rootapp->Draw();
+		rootapp->Draw();
 		}
 	/*LOAD FROM TREE OPTION*/
 	if (sessionOption == PositionTreeRead) {
@@ -887,6 +924,35 @@ int main(int argc, char* argv[]) {
 		layerDiffs.Update();
 
 		}
+
+	if (sessionOption == PositionTreePPT) {
+		//loads from rawpositionstrees
+		//so far no calibration implemented
+		//
+
+		DataSet* reconData = new DataSet();
+		TFile* positionsFile = TFile::Open("C:/Users/Tamara/Documents/GitHub/CalibrateDetectors/app/RawPositionInfoTree.root");
+		TTree* positionsTree = (TTree*)positionsFile->Get("Position Info for Detectors");
+		if (positionsFile == 0) {
+			cout << "File not found" << endl;
+		}
+		if (positionsTree == 0) {
+			cout << "No position tree could be loaded" << endl;
+		}
+
+		positionsTreeToDataSet(positionsTree, reconData, userDet);
+		positionsFile->Close();
+
+		//loop over all possible combinations of pitch propagation
+		
+		convertLayerPosition(reconData, Pitches, userDet, &UVWPositions);
+
+		convertCartesianPosition(reconData, userDet, &XYpositions, &UVWlayers, &UVWMasklayers);
+
+		//take sum of the differences
+		//fill hist
+
+	}
 
 		rootapp->Draw();
 

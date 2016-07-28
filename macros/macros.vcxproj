@@ -148,6 +148,7 @@
     <ClCompile Include="scanFiles.cpp" />
     <ClCompile Include="selectPosIonElec.cpp" />
     <ClCompile Include="sortReconData.cpp" />
+    <ClCompile Include="sumOfDifference.cpp" />
     <ClCompile Include="treeIO.cpp" />
   </ItemGroup>
   <ItemGroup>

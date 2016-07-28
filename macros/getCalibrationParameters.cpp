@@ -207,9 +207,9 @@ PitchPropData getCalibrationParameters(DataSet* dataSet, PitchPropSet initial, i
 	coefficientVector *= inverse;
 
 	PitchPropData result;
-	result.uPitchProp = coefficientVector[0];
-	result.vPitchProp = coefficientVector[1];
-	result.wPitchProp = coefficientVector[2];
+	result.uPitchProp = coefficientVector[0]*2.00;
+	result.vPitchProp = coefficientVector[1]*2.00;
+	result.wPitchProp = coefficientVector[2]*2.00;
 	result.uOffset = coefficientVector[3];
 	result.vOffset = coefficientVector[4];
 	result.wOffset = coefficientVector[5];
