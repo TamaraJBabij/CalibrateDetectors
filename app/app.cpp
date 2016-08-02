@@ -34,6 +34,7 @@
 #include <TAxis.h>
 #include "HistUVWPositions.h"
 #include "histlayerSums.h"
+#include "TH1.h"
 
 using namespace std;
 
@@ -85,7 +86,7 @@ int main(int argc, char* argv[]) {
 	and then saving timing info to a second tree, i.e. u1, u2, v1 etc. This allows for quicker detector calibration without having to reload the 
 	raw DAQ trees each time. It also takes up less of the visual studio virtual memory. */
 	string loadtype;
-	cout << "Would you like to run program to read in DAQ files (type: read), or to load a raw positions tree (type: load), or claibrate by minimising error function (type: error),or create fake data(type:create)" << endl;
+	cout << "Would you like to run program to read in DAQ files (type: read), or to load a raw positions tree (type: load), or claibrate by minimising error function (type: error),or create fake data(type:create), or iterate through all possible pitch propagations (type:iterate)" << endl;
 	cin >> loadtype;
 	CalibrateLoadType sessionOption;
 	if (loadtype.compare("read") == 0) {
@@ -102,6 +103,9 @@ int main(int argc, char* argv[]) {
 	}
 	else if (loadtype.compare("slope") == 0) {
 		sessionOption = PositionTreeSlope;
+	}
+	else if (loadtype.compare("iterate") == 0) {
+		sessionOption = PositionTreeIterate;
 	}
 
 	HistogramXY XYpositions;
@@ -211,7 +215,7 @@ int main(int argc, char* argv[]) {
 	}
 	
 
-	TCanvas XYPosDet("Positive Detector", "XY Positions", canvasWidth, h);
+	TCanvas XYPosDet("Positive Detector", "XY Positions Positron Detector", canvasWidth, h);
 	TCanvas XYNegDet("Negative Detector", "XY Positions", canvasWidth, h);
 	
 	if (userDet == bothDet) {
@@ -237,9 +241,14 @@ int main(int argc, char* argv[]) {
 	calibrateLayersHist UVWMasklayers;
 	TCanvas UVWNeglayersCanvas("UVW layers Canvas", "UVW Negative Detector", canvasWidth, h);
 	TCanvas UVWPoslayersCanvas("UVW layers Canvas", "UVW Positive Detctor", canvasWidth, h);
-	TCanvas UVWNegMaskLayersCanvasX("UVWMaskLayersCanvas", "UVW Negative Detector Layers, X vs Int");
+	TCanvas UVWNegMaskLayersCanvasX("UVWMaskLayersCanvas", "UVW Negative Detector Layers, x vs Int");
 	TCanvas UVWNegMaskLayersCanvasY("UVWMaskLayersCanvas", "UVW Negative Detector Layers, y vs Int");
-	TCanvas UVWPosMaskLayersCanvas("UVWMaskLayersCanvas", "UVW Positive Detector Layers");
+	TCanvas UVWPosMaskLayersCanvasX("UVWMaskLayersCanvas", "UVW Positive Detector Layers, x vs Int");
+	TCanvas UVWPosMaskLayersCanvasY("UVWMaskLayersCanvas", "UVW Positive Detector Layers, y vs Int");
+	TCanvas UVDetectorLayer("UV Det Layer", "UV det Layer", canvasWidth, h);
+	TCanvas UWDetectorLayer("UW Det Layer", "UW det Layer", canvasWidth, h);
+	TCanvas VWDetectorLayer("VW Det Layer", "VW det Layer", canvasWidth, h);
+
 	if (userDet == negDet) {
 		UVWNeglayersCanvas.cd();
 		UVWlayers.UVlayers = new TH2D("electronDET", "UV layer", 400, -60, 60, 400, -60, 60);
@@ -309,7 +318,7 @@ int main(int argc, char* argv[]) {
 		posLegend->AddEntry(UVWlayers.UWPoslayers, "UW layer");
 		posLegend->AddEntry(UVWlayers.VWPoslayers, "WV layer");
 		posLegend->Draw();
-		UVWPosMaskLayersCanvas.cd();
+		UVWPosMaskLayersCanvasX.cd();
 		UVWMasklayers.UVPosMasklayer = new TH1D("positronDET", "UV layer", 400, -60, 60);
 		UVWMasklayers.UWPosMasklayer = new TH1D("positronDET", "UW layer", 400, -60, 60);
 		UVWMasklayers.VWPosMasklayer = new TH1D("positronDET", "VW layer", 400, -60, 60);
@@ -324,6 +333,27 @@ int main(int argc, char* argv[]) {
 		posMaskLegend->AddEntry(UVWMasklayers.UWPosMasklayer, "UW layer");
 		posMaskLegend->AddEntry(UVWMasklayers.VWPosMasklayer, "WV layer");
 		posMaskLegend->Draw();
+		UVWPosMaskLayersCanvasY.cd();
+		UVWMasklayers.UVPosMasklayerY = new TH1D("positronDET", "UV layer", 400, -60, 60);
+		UVWMasklayers.UWPosMasklayerY = new TH1D("positronDET", "UW layer", 400, -60, 60);
+		UVWMasklayers.VWPosMasklayerY = new TH1D("positronDET", "VW layer", 400, -60, 60);
+		UVWMasklayers.UVPosMasklayerY->SetLineColor(kBlue);
+		UVWMasklayers.UWPosMasklayerY->SetLineColor(kRed);
+		UVWMasklayers.VWPosMasklayerY->SetLineColor(kBlack);
+		UVWMasklayers.UVPosMasklayerY->Draw("hist");
+		UVWMasklayers.UWPosMasklayerY->Draw("SameHist");
+		UVWMasklayers.VWPosMasklayerY->Draw("SameHist");
+		TLegend* posMaskLegendY = new TLegend(0.1, 0.7, 0.3, 0.9, "Layers");
+		posMaskLegendY->AddEntry(UVWMasklayers.UVPosMasklayerY, "UV layer");
+		posMaskLegendY->AddEntry(UVWMasklayers.UWPosMasklayerY, "UW layer");
+		posMaskLegendY->AddEntry(UVWMasklayers.VWPosMasklayerY, "WV layer");
+		posMaskLegendY->Draw();
+		UVDetectorLayer.cd();
+		UVWlayers.UVPoslayers->Draw("colz");
+		UWDetectorLayer.cd();
+		UVWlayers.UWPoslayers->Draw("colz");
+		VWDetectorLayer.cd();
+		UVWlayers.VWPoslayers->Draw("colz");
 	}
 	
 	layerDiffHist diffHist;
@@ -733,8 +763,8 @@ int main(int argc, char* argv[]) {
 					UVWNegMaskLayersCanvasY.Update();
 					UVWPoslayersCanvas.Modified();
 					UVWPoslayersCanvas.Update();
-					UVWPosMaskLayersCanvas.Modified();
-					UVWPosMaskLayersCanvas.Update();
+					//UVWPosMaskLayersCanvas.Modified();
+					//UVWPosMaskLayersCanvas.Update();
 
 					rootapp->Draw();
 
@@ -827,8 +857,8 @@ int main(int argc, char* argv[]) {
 		UVWNegMaskLayersCanvasY.Update();
 		UVWPoslayersCanvas.Modified();
 		UVWPoslayersCanvas.Update();
-		UVWPosMaskLayersCanvas.Modified();
-		UVWPosMaskLayersCanvas.Update();
+		//UVWPosMaskLayersCanvas.Modified();
+		//UVWPosMaskLayersCanvas.Update();
 
 		rootapp->Draw();
 		}
@@ -848,10 +878,68 @@ int main(int argc, char* argv[]) {
 
 			positionsTreeToDataSet(positionsTree, reconData, userDet);
 			positionsFile->Close();
-
+			cout << "tree loaded" << endl;
 			convertLayerPosition(reconData, Pitches, userDet, &UVWPositions);
+			cout << "Layer Positions" << endl;
+			convertCartesianPosition(reconData, userDet, &XYpositions, &UVWlayers, &UVWMasklayers);
+			cout << "Cartesian points" << endl;
+			
 
-			convertCartesianPosition(reconData, userDet, &XYpositions, &UVWlayers, &UVWMasklayers); 
+			//background subtraction for xy hist
+
+			//TH2D* BackgroundDet = new TH2D("background", "background", 400, -60, 60, 400, -60, 60);
+			//BackgroundDet->Add(BackgroundDet, -100.0);
+			double background = 20.00;
+			//XYpositions.positronDET->Add(XYpositions.positronDET,-100.00);
+			//cout << "background of -1000 added" << endl;
+			
+			if (userDet == posDet) {
+				int nx = XYpositions.positronDET->GetXaxis()->GetNbins();
+				int ny = XYpositions.positronDET->GetYaxis()->GetNbins();
+				for (int i = 1; i < nx; i++) {
+					for (int j = 1; j < ny; j++) {
+						double c1 = XYpositions.positronDET->GetBinContent(i, j);
+						double c2 = c1 - background;
+						if (c2 < 0) {
+							XYpositions.positronDET->SetBinContent(i, j, 0);
+						}
+						else {
+							XYpositions.positronDET->SetBinContent(i, j, c2);
+						}
+					}
+				}
+			}
+			if (userDet == negDet) {
+				int nx = XYpositions.electronDET->GetXaxis()->GetNbins();
+				int ny = XYpositions.electronDET->GetYaxis()->GetNbins();
+				for (int i = 1; i < nx; i++) {
+					for (int j = 1; j < ny; j++) {
+						double c1 = XYpositions.electronDET->GetBinContent(i, j);
+						double c2 = c1 - background;
+						if (c2 < 0) {
+							XYpositions.electronDET->SetBinContent(i, j, 0);
+						}
+						else {
+							XYpositions.electronDET->SetBinContent(i, j, c2);
+						}
+					}
+				}
+			}
+
+			cout << "Subtracted background of: " << background << endl;
+
+			XYPosDet.Modified();
+			XYPosDet.Update();
+			UVDetectorLayer.Modified();
+			UVDetectorLayer.Update();
+			UWDetectorLayer.Modified();
+			UWDetectorLayer.Update();
+			VWDetectorLayer.Modified();
+			VWDetectorLayer.Update();
+			UVWPosMaskLayersCanvasX.Modified();
+			UVWPosMaskLayersCanvasY.Update();
+			cout << "graphs updated" << endl;
+
 
 			if (userDet == negDet) {
 				double scaleUV = 1.0 / UVWMasklayers.UVMasklayer->GetMaximum();
@@ -892,8 +980,8 @@ int main(int argc, char* argv[]) {
 			UVWNegMaskLayersCanvasY.Update();
 			UVWPoslayersCanvas.Modified();
 			UVWPoslayersCanvas.Update();
-			UVWPosMaskLayersCanvas.Modified();
-			UVWPosMaskLayersCanvas.Update();
+			//UVWPosMaskLayersCanvas.Modified();
+			//UVWPosMaskLayersCanvas.Update();
 
 			rootapp->Draw();
 		}
@@ -925,7 +1013,7 @@ int main(int argc, char* argv[]) {
 
 		}
 
-	if (sessionOption == PositionTreePPT) {
+	if (sessionOption == PositionTreeIterate) {
 		//loads from rawpositionstrees
 		//so far no calibration implemented
 		//
@@ -944,6 +1032,7 @@ int main(int argc, char* argv[]) {
 		positionsFile->Close();
 
 		//loop over all possible combinations of pitch propagation
+		//Want only particles that have hit all layers
 		
 		convertLayerPosition(reconData, Pitches, userDet, &UVWPositions);
 
@@ -951,6 +1040,37 @@ int main(int argc, char* argv[]) {
 
 		//take sum of the differences
 		//fill hist
+
+		if (userDet == posDet){
+			//Lives updates the graphs
+			layersCanvas.Modified();
+			layersCanvas.Update();
+			XYPosDet.Modified();
+			XYPosDet.Update();
+			UVWNegMaskLayersCanvasX.Modified();
+			UVWNegMaskLayersCanvasX.Update();
+			UVWNegMaskLayersCanvasY.Modified();
+			UVWNegMaskLayersCanvasY.Update();
+			UVWPoslayersCanvas.Modified();
+			UVWPoslayersCanvas.Update();
+		}
+
+
+		//Lives updates the graphs
+		layersCanvas.Modified();
+		layersCanvas.Update();
+		XYPosDet.Modified();
+		XYPosDet.Update();
+		XYNegDet.Modified();
+		XYNegDet.Update();
+		UVWNeglayersCanvas.Modified();
+		UVWNeglayersCanvas.Update();
+		UVWNegMaskLayersCanvasX.Modified();
+		UVWNegMaskLayersCanvasX.Update();
+		UVWNegMaskLayersCanvasY.Modified();
+		UVWNegMaskLayersCanvasY.Update();
+		UVWPoslayersCanvas.Modified();
+		UVWPoslayersCanvas.Update();
 
 	}
 

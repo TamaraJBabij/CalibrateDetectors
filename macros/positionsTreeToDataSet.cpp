@@ -66,14 +66,18 @@ void positionsTreeToDataSet(TTree* tree, DataSet* data, imagingDetectors userDet
 		//make the Hit object by loading the values from the tree according to the config file
 			if (ULayer != 0){
 				e->storePair(u, u1Time, u2Time);
+				//cout << "U Layer" << endl;
 			}
 			if (VLayer != 0) {
 				e->storePair(v, v1Time, v2Time);
+				//cout << "V Layer" << endl;
 			}
 			if (WLayer != 0) {
 				e->storePair(w, w1Time, w2Time);
+				//cout << "W Layer" << endl;
 			}
 			currentGroup->addEvent(e);
+			//cout << "event added" << endl;
 	}
 }
 
