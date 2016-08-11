@@ -139,10 +139,10 @@ void convertLayerPosition(DataSet* reconData, PitchPropSet Pitches, imagingDetec
 						double Unogap = (negPitches.uPitchProp / 2)*(e->uPairs.front().line1 - e->uPairs.front().line2) + negPitches.uOffset;
 							//cout << "unogap " << Unogap << endl;
 						if (Unogap < -1) {
-							e->U = Unogap - 0; ((9 - 2) / 2);// -(9 / 2);
+							e->U = Unogap - ((9 - 3) / 2);// -(9 / 2);
 						}
 						else {
-							e->U = Unogap + 0; ((9 - 2) / 2);// +(9 / 2);
+							e->U = Unogap + ((9 - 3) / 2);// +(9 / 2);
 
 						}
 						if (UVWPositions != NULL) {
@@ -154,10 +154,10 @@ void convertLayerPosition(DataSet* reconData, PitchPropSet Pitches, imagingDetec
 						double Vnogap = (negPitches.vPitchProp / 2)*(e->vPairs.front().line1 - e->vPairs.front().line2) + negPitches.vOffset;
 						//cout << "V layer: " << Vnogap << endl;
 						if (Vnogap < -0.5) {
-							e->V = Vnogap - 0; ((8 - 0.6) / 2);// -(8 / 2);
+							e->V = Vnogap - ((8-1.8) / 2);// -(8 / 2);
 						}
 						else {
-							e->V = Vnogap + 0; ((8 - 0.6) / 2);// +(8 / 2);
+							e->V = Vnogap + ((8-1.8) / 2);// +(8 / 2);
 						}
 						if (UVWPositions != NULL) {
 							UVWPositions->VNegPositions->Fill(e->V);
@@ -169,10 +169,10 @@ void convertLayerPosition(DataSet* reconData, PitchPropSet Pitches, imagingDetec
 						double Wnogap = (negPitches.wPitchProp / 2)*(e->wPairs.front().line1 - e->wPairs.front().line2) + negPitches.wOffset;
 						//cout << "W layer: " << Wnogap << endl;
 						if (Wnogap < -0.5) {
-							e->W = Wnogap - 0; ((8 - 2) / 2);// -(8 / 2);
+							e->W = Wnogap - ((8 - 3.3) / 2);// -(8 / 2);
 						}
 						else {
-							e->W = Wnogap + 0; ((8 - 2) / 2);// +(8 / 2);
+							e->W = Wnogap + ((8 - 3.3) / 2);// +(8 / 2);
 						}
 						if (UVWPositions != NULL) {
 							UVWPositions->WNegPositions->Fill(e->W);

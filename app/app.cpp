@@ -889,7 +889,7 @@ int main(int argc, char* argv[]) {
 
 			//TH2D* BackgroundDet = new TH2D("background", "background", 400, -60, 60, 400, -60, 60);
 			//BackgroundDet->Add(BackgroundDet, -100.0);
-			double background = 20.00;
+			double background = 15.00;
 			//XYpositions.positronDET->Add(XYpositions.positronDET,-100.00);
 			//cout << "background of -1000 added" << endl;
 			
